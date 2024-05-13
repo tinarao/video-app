@@ -1,11 +1,23 @@
+import { z } from 'zod';
 export interface Video {
   id?: number;
   title: string;
-  desc?: string;
   video: string;
-  views?: number;
   authorID: number;
+  desc?: string;
+  views?: number;
 }
+
+export const videoSchema = z.object({
+  id: z.number().positive(),
+  title: z.string().min(1).max(50),
+  video: z.string().min(5).max(75),
+  authorID: z.number().positive(),
+  desc: z.optional(z.string()),
+  views: z.number().positive()
+})
+
+export const videoArrSchema = z.array(videoSchema)
 
 export const VideoMocks = [
   {
