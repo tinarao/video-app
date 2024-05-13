@@ -1,1 +1,1 @@
-проект на незнакомых технологиях - trpc - vue
+i dont like vue anymore
