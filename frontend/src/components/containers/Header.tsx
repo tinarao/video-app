@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 
 const Header = () => {
   return (
-    <header>
+    <header className="border-b">
       <div className="container py-2 text-neutral-800">
         <nav>
           <ul className="flex gap-1">
@@ -23,6 +23,15 @@ const Header = () => {
                 className="[&.active]:bg-neutral-100"
               >
                 <Link to="/profile">Profile</Link>
+              </Button>
+            </li>
+            <li>
+              <Button
+                asChild
+                variant="ghost"
+                className="[&.active]:bg-neutral-100"
+              >
+                <Link to="/upload">Upload</Link>
               </Button>
             </li>
           </ul>

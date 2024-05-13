@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export type Video = z.infer<typeof videoSchema>
+export type Video = z.infer<typeof videoSchema>;
 
 export const videoSchema = z.object({
   id: z.number().positive(),
@@ -9,9 +9,9 @@ export const videoSchema = z.object({
   views: z.number().positive(),
   authorID: z.number().positive(),
   desc: z.optional(z.string()),
-})
+});
 
-export const videoArrSchema = z.array(videoSchema)
+export const videoArrSchema = z.array(videoSchema);
 
 export const VideoMocks: Video[] = [
   {
