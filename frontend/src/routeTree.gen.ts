@@ -13,29 +13,43 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as AuthenticatedImport } from './routes/_authenticated'
 
 // Create Virtual Routes
 
-const UploadLazyImport = createFileRoute('/upload')()
-const ProfileLazyImport = createFileRoute('/profile')()
 const IndexLazyImport = createFileRoute('/')()
+const AuthenticatedUploadLazyImport = createFileRoute(
+  '/_authenticated/upload',
+)()
+const AuthenticatedProfileLazyImport = createFileRoute(
+  '/_authenticated/profile',
+)()
 
 // Create/Update Routes
 
-const UploadLazyRoute = UploadLazyImport.update({
-  path: '/upload',
+const AuthenticatedRoute = AuthenticatedImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/upload.lazy').then((d) => d.Route))
-
-const ProfileLazyRoute = ProfileLazyImport.update({
-  path: '/profile',
-  getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/profile.lazy').then((d) => d.Route))
+} as any)
 
 const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const AuthenticatedUploadLazyRoute = AuthenticatedUploadLazyImport.update({
+  path: '/upload',
+  getParentRoute: () => AuthenticatedRoute,
+} as any).lazy(() =>
+  import('./routes/_authenticated/upload.lazy').then((d) => d.Route),
+)
+
+const AuthenticatedProfileLazyRoute = AuthenticatedProfileLazyImport.update({
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRoute,
+} as any).lazy(() =>
+  import('./routes/_authenticated/profile.lazy').then((d) => d.Route),
+)
 
 // Populate the FileRoutesByPath interface
 
@@ -45,13 +59,17 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
-    '/profile': {
-      preLoaderRoute: typeof ProfileLazyImport
+    '/_authenticated': {
+      preLoaderRoute: typeof AuthenticatedImport
       parentRoute: typeof rootRoute
     }
-    '/upload': {
-      preLoaderRoute: typeof UploadLazyImport
-      parentRoute: typeof rootRoute
+    '/_authenticated/profile': {
+      preLoaderRoute: typeof AuthenticatedProfileLazyImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/upload': {
+      preLoaderRoute: typeof AuthenticatedUploadLazyImport
+      parentRoute: typeof AuthenticatedImport
     }
   }
 }
@@ -60,8 +78,10 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren([
   IndexLazyRoute,
-  ProfileLazyRoute,
-  UploadLazyRoute,
+  AuthenticatedRoute.addChildren([
+    AuthenticatedProfileLazyRoute,
+    AuthenticatedUploadLazyRoute,
+  ]),
 ])
 
 /* prettier-ignore-end */

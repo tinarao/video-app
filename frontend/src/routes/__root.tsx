@@ -1,20 +1,20 @@
 import Header from '@/components/containers/Header';
-import { createRootRoute, Outlet } from '@tanstack/react-router';
-
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
+import { type QueryClient } from '@tanstack/react-query';
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { Toaster } from 'sonner';
 
-const queryClient = new QueryClient();
+interface RouterContext {
+  queryClient: QueryClient;
+}
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
-    <QueryClientProvider client={queryClient}>
+    <>
       <Toaster />
       <Header />
       <div className="text-foreground py-8">
         <Outlet />
       </div>
-    </QueryClientProvider>
+    </>
   ),
 });

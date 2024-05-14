@@ -1,46 +1,20 @@
 import { Button } from '@/components/ui/button';
-import { api } from '@/lib/rpc';
+import { userQueryOpts } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { createLazyFileRoute } from '@tanstack/react-router';
 import { Cog, LoaderCircle } from 'lucide-react';
-import { useState } from 'react';
 import { toast } from 'sonner';
 
-export const Route = createLazyFileRoute('/profile')({
+export const Route = createLazyFileRoute('/_authenticated/profile')({
   component: About,
 });
 
 function About() {
-  const [metric, setMetric] = useState<number>(0);
-
-  const getUserData = async () => {
-    const time = performance.now();
-
-    const data = await api.auth.me.$get();
-    const vids = await data.json();
-
-    setMetric(performance.now() - time);
-    return vids;
-  };
-
-  const {
-    data: user,
-    isLoading,
-    isFetched,
-    isError,
-  } = useQuery({
-    queryKey: ['user-data'],
-    queryFn: getUserData,
-  });
+  const { isError, isLoading, data: user } = useQuery(userQueryOpts);
 
   if (isError) {
     toast.error('Not authenticated');
     return;
-  }
-
-  if (isFetched) {
-    toast.success(`fetched user data in ${metric.toFixed(2)} millisec.`);
-    console.log(user);
   }
 
   return (

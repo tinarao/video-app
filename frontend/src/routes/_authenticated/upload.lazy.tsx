@@ -1,7 +1,7 @@
 import { UploadForm } from '@/components/forms/UploadForm';
 import { createLazyFileRoute } from '@tanstack/react-router';
 
-export const Route = createLazyFileRoute('/upload')({
+export const Route = createLazyFileRoute('/_authenticated/upload')({
   component: Upload,
 });
 
