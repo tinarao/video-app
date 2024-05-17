@@ -1,11 +1,12 @@
 import { Link, createLazyFileRoute } from '@tanstack/react-router';
-import { ArrowUpRightIcon, Eye, LoaderCircle, TvIcon } from 'lucide-react';
+import { ArrowUpRightIcon, LoaderCircle, TvIcon } from 'lucide-react';
 
 import { api } from '@/lib/rpc';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import VideoCard from '@/components/pages/shared/VideoCard';
 
 export const Route = createLazyFileRoute('/')({
   component: Index,
@@ -60,21 +61,7 @@ function Index() {
           )}
           {data !== undefined &&
             data.length !== 0 &&
-            data!.map((i) => (
-              <div
-                key={i.id}
-                className="col-span-1 border rounded-md shadow-sm hover:shadow-md transition"
-              >
-                <video src={i.video} controls={false}></video>
-                <div className="p-2">
-                  <h3 className="text-lg font-medium">{i.title}</h3>
-                  <div className="flex items-center text-muted-foreground font-medium text-sm">
-                    <Eye className="size-4 mr-1" />
-                    <span>{i.views}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+            data!.map((i) => <VideoCard vid={i} key={i.id} />)}
         </div>
       )}
     </div>

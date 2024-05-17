@@ -21,5 +21,5 @@ export class Video {
     desc: string
 
     @Column("timestamptz")
-    createdAt: Date
+    createdAt: Date | string
 }

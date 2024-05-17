@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import { VideoMocks } from '../types/video';
 import { zValidator } from '@hono/zod-validator';
 
 import { z } from 'zod';
@@ -30,17 +29,15 @@ export const videosRoute = new Hono()
 
   .get('/:id{[0-9]+}', async (c) => {
     const id = c.req.param('id');
-    const foundVid = VideoMocks.find((v) => v.id === parseInt(id));
-    if (!foundVid) return c.json({ message: 'not found' }, 404);
+    const foundVid = await AppDataSource.manager.findOne(Video, { where: { id: parseInt(id) } })
     return c.json({ data: foundVid });
   })
 
   .get('/:userID', async c => {
-    // const userID = c.req.param('userID')
-    // const videos = AppDataSource.manager.find(Video, { where: { authorID: userID } })
-    // return c.json({ videos })
+    const userID = c.req.param('userID')
+    const videos = await AppDataSource.manager.find(Video, { where: { authorID: userID } })
 
-    return c.text("get videos by userID")
+    return c.json({ videos: videos })
   })
 
   .post('/', auth, zValidator('json', addVideoDTO), async (c) => {
@@ -64,9 +61,5 @@ export const videosRoute = new Hono()
   })
 
   .delete('/:id{[0-9]+}', auth, zValidator('json', addVideoDTO), async (c) => {
-    const id = c.req.param('id');
-    const foundVid = VideoMocks.find((v) => v.id === parseInt(id));
-    if (!foundVid) return c.json({ message: 'not found' }, 404);
-    VideoMocks.filter((i) => i.id != parseInt(id));
-    return c.json({ data: foundVid });
+    return c.json({ 'm': "wip" })
   });

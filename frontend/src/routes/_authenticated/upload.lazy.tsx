@@ -8,7 +8,7 @@ export const Route = createLazyFileRoute('/_authenticated/upload')({
 function Upload() {
   return (
     <div className="container">
-      <h1 className="text-5xl">Загрузка видео</h1>
+      <h1 className="text-5xl mb-8">Загрузка видео</h1>
       <UploadForm />
     </div>
   );
