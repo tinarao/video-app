@@ -1,10 +1,11 @@
-import { createLazyFileRoute } from '@tanstack/react-router';
-import { Eye, LoaderCircle } from 'lucide-react';
+import { Link, createLazyFileRoute } from '@tanstack/react-router';
+import { ArrowUpRightIcon, Eye, LoaderCircle, TvIcon } from 'lucide-react';
 
 import { api } from '@/lib/rpc';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 
 export const Route = createLazyFileRoute('/')({
   component: Index,
@@ -32,6 +33,8 @@ function Index() {
     toast.success(`fetched videos in ${metric.toFixed(2)} millisec.`);
   }
 
+  console.log(data);
+
   return (
     <div className="container">
       {isLoading ? (
@@ -41,12 +44,24 @@ function Index() {
       ) : (
         <div className="grid grid-cols-4 gap-8">
           {/* made this to avoid nested ternaries */}
-          {data === undefined && (
-            <div className="col-span-4 py-48 text-center">
-              <h1 className="text-6xl">Empty here</h1>
+          {(data === undefined || data.length === 0) && (
+            <div className="col-span-4 py-48 flex flex-col items-center justify-center gap-8 text-muted-foreground">
+              <div>
+                <TvIcon size={48} className="w-fit mx-auto" />
+                <h1 className="text-6xl text-center">
+                  Здесь пусто! Загрузите своё первое видео или подпишитесь на
+                  интересующие каналы.
+                </h1>
+              </div>
+              <Button asChild size="lg" variant="outline">
+                <Link to="/upload">
+                  <ArrowUpRightIcon className="size-4 mr-2" /> Загрузить видео
+                </Link>
+              </Button>
             </div>
           )}
           {data !== undefined &&
+            data.length !== 0 &&
             data!.map((i) => (
               <div
                 key={i.id}

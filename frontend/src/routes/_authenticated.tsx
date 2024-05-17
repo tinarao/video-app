@@ -5,9 +5,11 @@ import { Outlet, createFileRoute } from '@tanstack/react-router';
 
 const Comp = () => {
   const { user } = Route.useRouteContext();
+  const root =
+    process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000';
 
   if (!user) {
-    return <div>rd to auth page </div>;
+    return window.location.replace(`${root}/api/auth/login`);
   }
 
   return <Outlet />;

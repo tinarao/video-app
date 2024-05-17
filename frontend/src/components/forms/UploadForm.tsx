@@ -2,13 +2,13 @@ import { useForm } from '@tanstack/react-form';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
+import { Button } from '../ui/button';
 
 export const UploadForm = () => {
   const form = useForm({
     defaultValues: {
       title: '',
       video: '',
-      authorID: '',
       desc: '',
     },
     onSubmit: async ({ value }) => {
@@ -58,21 +58,6 @@ export const UploadForm = () => {
         </div>
         <div className="col-span-1 space-y-4">
           <form.Field
-            name="authorID"
-            children={(f) => (
-              <div>
-                <Label>authorID</Label>
-                <Input
-                  type="number"
-                  name={f.name}
-                  value={f.state.value}
-                  onBlur={f.handleBlur}
-                  onChange={(e) => f.handleChange(e.target.value)}
-                />
-              </div>
-            )}
-          />
-          <form.Field
             name="desc"
             children={(f) => (
               <div>
@@ -87,6 +72,7 @@ export const UploadForm = () => {
             )}
           />
         </div>
+        <Button>Загрузить</Button>
       </form>
     </div>
   );
