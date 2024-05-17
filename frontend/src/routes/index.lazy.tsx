@@ -33,8 +33,6 @@ function Index() {
     toast.success(`fetched videos in ${metric.toFixed(2)} millisec.`);
   }
 
-  console.log(data);
-
   return (
     <div className="container">
       {isLoading ? (
@@ -65,12 +63,15 @@ function Index() {
             data!.map((i) => (
               <div
                 key={i.id}
-                className="col-span-1 p-2 border rounded-md shadow-sm hover:shadow-md transition"
+                className="col-span-1 border rounded-md shadow-sm hover:shadow-md transition"
               >
-                <h3>{i.title}</h3>
-                <div className="flex items-center text-muted-foreground font-medium text-sm">
-                  <Eye className="size-4 mr-1" />
-                  <span>{i.views}</span>
+                <video src={i.video} controls={false}></video>
+                <div className="p-2">
+                  <h3 className="text-lg font-medium">{i.title}</h3>
+                  <div className="flex items-center text-muted-foreground font-medium text-sm">
+                    <Eye className="size-4 mr-1" />
+                    <span>{i.views}</span>
+                  </div>
                 </div>
               </div>
             ))}
