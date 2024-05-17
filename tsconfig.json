@@ -5,6 +5,9 @@
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
     "jsx": "react-jsx",
     "allowJs": true,
 

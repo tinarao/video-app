@@ -3,6 +3,7 @@ import { userQueryOpts } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { createLazyFileRoute } from '@tanstack/react-router';
 import { Cog, LoaderCircle } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 export const Route = createLazyFileRoute('/_authenticated/profile')({
@@ -12,9 +13,25 @@ export const Route = createLazyFileRoute('/_authenticated/profile')({
 function About() {
   const { isError, isLoading, data: user } = useQuery(userQueryOpts);
 
-  if (isError) {
-    toast.error('Not authenticated');
-    return;
+  const [metric, setMetric] = useState<number>(0);
+
+  const getVideos = async () => {
+    const time = performance.now();
+
+    const data = await api.videos.$get();
+    const vids = await data.json();
+
+    setMetric(performance.now() - time);
+    return vids.data;
+  };
+
+  const { data, isLoading, isFetched } = useQuery({
+    queryKey: ['videosIndex'],
+    queryFn: getVideos,
+  });
+
+  if (isFetched) {
+    toast.success(`fetched videos in ${metric.toFixed(2)} millisec.`);
   }
 
   return (

@@ -4,16 +4,28 @@ import { zValidator } from '@hono/zod-validator';
 
 import { z } from 'zod';
 import { auth } from '../middleware/auth';
+import { AppDataSource } from '../db/db';
+import { Video } from '../db/entities/video.entity';
 
 const addVideoDTO = z.object({
   title: z.string().min(1).max(50),
-  video: z.string().min(5).max(75),
-  authorID: z.string(),
+  video: z.string(),
+  desc: z.optional(z.string())
 });
+
+interface RecievedVideoObject {
+  title: string
+  desc?: string
+  video: string
+  authorID: string
+}
 
 export const videosRoute = new Hono()
   .get('/', async (c) => {
-    return c.json({ data: VideoMocks });
+
+    const vids = await AppDataSource.manager.find(Video)
+
+    return c.json({ data: vids });
   })
 
   .get('/:id{[0-9]+}', async (c) => {
@@ -23,17 +35,32 @@ export const videosRoute = new Hono()
     return c.json({ data: foundVid });
   })
 
+  .get('/:userID', async c => {
+    // const userID = c.req.param('userID')
+    // const videos = AppDataSource.manager.find(Video, { where: { authorID: userID } })
+    // return c.json({ videos })
+
+    return c.text("get videos by userID")
+  })
+
   .post('/', auth, zValidator('json', addVideoDTO), async (c) => {
-    const newVid = c.req.valid('json');
     const user = c.var.user
-    const doc = {
-      ...newVid,
-      id: VideoMocks.length + 1,
-      authorID: user.id,
-      views: 0,
-    };
-    VideoMocks.push({ ...doc });
-    return c.json({ data: VideoMocks }, 201);
+    const data = addVideoDTO.parse(await c.req.json())
+
+    const doc = new Video()
+    doc.video = data.video
+    doc.title = data.title
+    doc.authorID = user.id
+    doc.desc = data.desc || ""
+    doc.views = 0
+    doc.createdAt = new Date()
+
+    try {
+      const saved = await AppDataSource.manager.save(doc)
+      return c.json({ saved }, 201);
+    } catch (error) {
+      return c.json({ "message": "ISE" }, 500)
+    }
   })
 
   .delete('/:id{[0-9]+}', auth, zValidator('json', addVideoDTO), async (c) => {
