@@ -9,16 +9,9 @@ import {
 import { Button } from './button';
 import { api } from '@/lib/rpc';
 import { toast } from 'sonner';
+import { User } from '@/types/user';
 
-interface UserProp {
-  picture: string | null;
-  family_name: string;
-  given_name: string;
-  email: string;
-  id: string;
-}
-
-const ProfileDropdown = ({ user }: { user: UserProp }) => {
+const ProfileDropdown = ({ user }: { user: User }) => {
   const handleLogout = async () => {
     const res = await api.auth.logout.$get();
     if (!res.ok) {
@@ -39,7 +32,7 @@ const ProfileDropdown = ({ user }: { user: UserProp }) => {
             src={user.picture || 'https://amu.edu.kz/upload/default-avatar.jpg'}
             className="size-8 mr-2 rounded-full"
           />
-          {user.family_name}
+          {user.username}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>

@@ -1,15 +1,13 @@
 // https://tanstack.com/router/latest/docs/framework/react/guide/authenticated-routes
 
 import { userQueryOpts } from '@/lib/auth';
-import { Outlet, createFileRoute } from '@tanstack/react-router';
+import { Navigate, Outlet, createFileRoute } from '@tanstack/react-router';
 
 const Comp = () => {
   const { user } = Route.useRouteContext();
-  const root =
-    process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3000';
 
   if (!user) {
-    return window.location.replace(`${root}/api/auth/login`);
+    return <Navigate to="/login" />;
   }
 
   return <Outlet />;

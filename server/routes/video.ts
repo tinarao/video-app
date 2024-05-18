@@ -30,14 +30,14 @@ export const videosRoute = new Hono()
   .get('/:id{[0-9]+}', async (c) => {
     const id = c.req.param('id');
     const foundVid = await AppDataSource.manager.findOne(Video, { where: { id: parseInt(id) } })
-    return c.json({ data: foundVid });
+    return c.json({ videos: foundVid });
   })
 
-  .get('/:userID', async c => {
+  .get('/by-user/:userID{[0-9]+}', async c => {
     const userID = c.req.param('userID')
-    const videos = await AppDataSource.manager.find(Video, { where: { authorID: userID } })
+    const videos = await AppDataSource.manager.find(Video, { where: { author: { id: parseInt(userID) } } })
 
-    return c.json({ videos: videos })
+    return c.json({ videos }, 200)
   })
 
   .post('/', auth, zValidator('json', addVideoDTO), async (c) => {
@@ -47,7 +47,6 @@ export const videosRoute = new Hono()
     const doc = new Video()
     doc.video = data.video
     doc.title = data.title
-    doc.authorID = user.id
     doc.desc = data.desc || ""
     doc.views = 0
     doc.createdAt = new Date()

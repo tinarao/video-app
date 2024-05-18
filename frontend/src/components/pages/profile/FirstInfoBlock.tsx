@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
-import { UserType } from '@kinde-oss/kinde-typescript-sdk';
+import { User } from '@/types/user';
 import { Cog } from 'lucide-react';
 
-const FirstInfoBlock = ({ user }: { user: UserType }) => {
+const FirstInfoBlock = ({ user }: { user: User }) => {
   return (
     <div className="border-b">
       <div className="container flex justify-between py-6">
@@ -16,7 +16,8 @@ const FirstInfoBlock = ({ user }: { user: UserType }) => {
           <div>
             <span className="text-muted-foreground font-medium">Привет,</span>
             <h3 className="text-5xl font-medium">
-              {user?.family_name} {user?.given_name}
+              {user.username}
+              <span className="text-orange-400">!</span>
             </h3>
           </div>
         </div>

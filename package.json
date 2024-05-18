@@ -3,7 +3,7 @@
   "module": "index.ts",
   "scripts": {
     "start": "bun server/index.ts",
-    "dev": "bun --watch server/index.ts",
+    "dev": "bun --env-file=server/.env --watch server/index.ts",
     "format": "bunx prettier . --write"
   },
   "type": "module",
@@ -19,6 +19,8 @@
     "@hono/zod-validator": "^0.2.1",
     "@kinde-oss/kinde-typescript-sdk": "^2.9.0",
     "@supabase/supabase-js": "^2.43.2",
+    "@types/bcrypt": "^5.0.2",
+    "bcrypt": "^5.1.1",
     "drizzle-orm": "^0.30.10",
     "hono": "^4.3.5",
     "pg": "^8.11.5",

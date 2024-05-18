@@ -1,4 +1,3 @@
-import Header from '@/components/containers/Header';
 import { type QueryClient } from '@tanstack/react-query';
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { Toaster } from 'sonner';
@@ -10,9 +9,8 @@ interface RouterContext {
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
     <>
-      <Toaster />
-      <Header />
-      <div className="text-foreground py-8">
+      <Toaster richColors />
+      <div className="text-foreground">
         <Outlet />
       </div>
     </>

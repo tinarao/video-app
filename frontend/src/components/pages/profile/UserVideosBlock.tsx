@@ -1,22 +1,23 @@
 import { api } from '@/lib/rpc';
-import { UserType } from '@kinde-oss/kinde-typescript-sdk';
 import { useQuery } from '@tanstack/react-query';
-import { LoaderCircle, TvIcon } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import VideoCard from '../shared/VideoCard';
+import { User } from '@/types/user';
+import NothingHere from '@/components/containers/NothingHere';
 
-const UserVideosBlock = ({ user }: { user: UserType }) => {
+const UserVideosBlock = ({ user }: { user: User }) => {
   const [metric, setMetric] = useState(0);
 
   const getVideos = async () => {
     const time = performance.now();
-    const res = await api.videos[':userID'].$get({
-      param: { userID: user.id },
-    });
-    const videos = await res.json();
 
-    console.log(videos);
+    const res = await api.videos['by-user'][':userID{[0-9]+}'].$get({
+      param: { userID: String(user.id) },
+    });
+
+    const videos = await res.json();
     setMetric(performance.now() - time);
 
     return videos.videos;
@@ -32,8 +33,7 @@ const UserVideosBlock = ({ user }: { user: UserType }) => {
   });
 
   if (isFetched) {
-    toast.success(`fetched videos in ${metric.toFixed(2)} millisec.`);
-    console.log(vids);
+    toast.success(`fetched user's videos in ${metric.toFixed(2)} millisec.`);
   }
 
   return (
@@ -44,13 +44,7 @@ const UserVideosBlock = ({ user }: { user: UserType }) => {
         ) : (
           <>
             {!vids || vids.length === 0 ? (
-              <div>
-                <TvIcon size={48} className="w-fit mx-auto" />
-                <h1 className="text-6xl text-center">
-                  Здесь пусто! Загрузите своё первое видео или подпишитесь на
-                  интересующие каналы.
-                </h1>
-              </div>
+              <NothingHere />
             ) : (
               <>
                 {vids.map((i) => (

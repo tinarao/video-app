@@ -6,7 +6,7 @@ const getUserData = async () => {
     if (!res.ok) {
         throw new Error('Not authenticated');
     }
-    const user = await res.json();
+    const { user } = await res.json();
     return user;
 };
 

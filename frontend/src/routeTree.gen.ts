@@ -17,6 +17,8 @@ import { Route as AuthenticatedImport } from './routes/_authenticated'
 
 // Create Virtual Routes
 
+const RegisterLazyImport = createFileRoute('/register')()
+const LoginLazyImport = createFileRoute('/login')()
 const IndexLazyImport = createFileRoute('/')()
 const AuthenticatedUploadLazyImport = createFileRoute(
   '/_authenticated/upload',
@@ -26,6 +28,16 @@ const AuthenticatedProfileLazyImport = createFileRoute(
 )()
 
 // Create/Update Routes
+
+const RegisterLazyRoute = RegisterLazyImport.update({
+  path: '/register',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/register.lazy').then((d) => d.Route))
+
+const LoginLazyRoute = LoginLazyImport.update({
+  path: '/login',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
 
 const AuthenticatedRoute = AuthenticatedImport.update({
   id: '/_authenticated',
@@ -63,6 +75,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedImport
       parentRoute: typeof rootRoute
     }
+    '/login': {
+      preLoaderRoute: typeof LoginLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/register': {
+      preLoaderRoute: typeof RegisterLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/_authenticated/profile': {
       preLoaderRoute: typeof AuthenticatedProfileLazyImport
       parentRoute: typeof AuthenticatedImport
@@ -82,6 +102,8 @@ export const routeTree = rootRoute.addChildren([
     AuthenticatedProfileLazyRoute,
     AuthenticatedUploadLazyRoute,
   ]),
+  LoginLazyRoute,
+  RegisterLazyRoute,
 ])
 
 /* prettier-ignore-end */

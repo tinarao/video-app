@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm"
+import { User } from "./user.entity"
 
 @Entity()
 export class Video {
@@ -14,8 +15,8 @@ export class Video {
     @Column("numeric")
     views: number
 
-    @Column("text")
-    authorID: string
+    @ManyToOne(() => User, (user) => user.videos)
+    author: User
 
     @Column("text")
     desc: string

@@ -46,7 +46,7 @@ const Header = () => {
             <ProfileDropdown user={user} />
           ) : (
             <Button asChild variant="outline">
-              <a href="/api/auth/login">Войти</a>
+              <Link to="/login">Войти</Link>
             </Button>
           )}
         </div>

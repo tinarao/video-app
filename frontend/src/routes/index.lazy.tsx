@@ -1,5 +1,5 @@
 import { Link, createLazyFileRoute } from '@tanstack/react-router';
-import { ArrowUpRightIcon, LoaderCircle, TvIcon } from 'lucide-react';
+import { ArrowUpRightIcon, LoaderCircle } from 'lucide-react';
 
 import { api } from '@/lib/rpc';
 import { useQuery } from '@tanstack/react-query';
@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import VideoCard from '@/components/pages/shared/VideoCard';
+import MainLayout from '@/components/layouts/main-layout';
+import NothingHere from '@/components/containers/NothingHere';
 
 export const Route = createLazyFileRoute('/')({
   component: Index,
@@ -31,39 +33,35 @@ function Index() {
   });
 
   if (isFetched) {
-    toast.success(`fetched videos in ${metric.toFixed(2)} millisec.`);
+    toast.success(`fetched index videos in ${metric.toFixed(2)} millisec.`);
   }
 
   return (
-    <div className="container">
-      {isLoading ? (
-        <div className="h-80 flex items-center justify-center">
-          <LoaderCircle color="black" size={50} className="animate-spin" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-4 gap-8">
-          {/* made this to avoid nested ternaries */}
-          {(data === undefined || data.length === 0) && (
-            <div className="col-span-4 py-48 flex flex-col items-center justify-center gap-8 text-muted-foreground">
-              <div>
-                <TvIcon size={48} className="w-fit mx-auto" />
-                <h1 className="text-6xl text-center">
-                  Здесь пусто! Загрузите своё первое видео или подпишитесь на
-                  интересующие каналы.
-                </h1>
+    <MainLayout>
+      <div className="container">
+        {isLoading ? (
+          <div className="h-80 flex items-center justify-center">
+            <LoaderCircle color="black" size={50} className="animate-spin" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 gap-8">
+            {/* made this to avoid nested ternaries */}
+            {(data === undefined || data.length === 0) && (
+              <div className="col-span-4 py-48 flex flex-col items-center justify-center gap-8 text-muted-foreground">
+                <NothingHere />
+                <Button asChild size="lg" variant="outline">
+                  <Link to="/upload">
+                    <ArrowUpRightIcon className="size-4 mr-2" /> Загрузить видео
+                  </Link>
+                </Button>
               </div>
-              <Button asChild size="lg" variant="outline">
-                <Link to="/upload">
-                  <ArrowUpRightIcon className="size-4 mr-2" /> Загрузить видео
-                </Link>
-              </Button>
-            </div>
-          )}
-          {data !== undefined &&
-            data.length !== 0 &&
-            data!.map((i) => <VideoCard vid={i} key={i.id} />)}
-        </div>
-      )}
-    </div>
+            )}
+            {data !== undefined &&
+              data.length !== 0 &&
+              data!.map((i) => <VideoCard vid={i} key={i.id} />)}
+          </div>
+        )}
+      </div>
+    </MainLayout>
   );
 }
