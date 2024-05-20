@@ -9,15 +9,9 @@ import { Video } from '../db/entities/video.entity';
 const addVideoDTO = z.object({
   title: z.string().min(1).max(50),
   video: z.string(),
-  desc: z.optional(z.string())
+  desc: z.optional(z.string()),
+  url: z.string()
 });
-
-interface RecievedVideoObject {
-  title: string
-  desc?: string
-  video: string
-  authorID: string
-}
 
 export const videosRoute = new Hono()
   .get('/', async (c) => {
@@ -27,10 +21,11 @@ export const videosRoute = new Hono()
     return c.json({ data: vids });
   })
 
-  .get('/:id{[0-9]+}', async (c) => {
-    const id = c.req.param('id');
-    const foundVid = await AppDataSource.manager.findOne(Video, { where: { id: parseInt(id) } })
-    return c.json({ videos: foundVid });
+  .get('/:url', async (c) => {
+    const url = c.req.param('url');
+    console.log("hear")
+    const foundVid = await AppDataSource.manager.findOne(Video, { where: { url: url } })
+    return c.json({ ...foundVid });
   })
 
   .get('/by-user/:userID{[0-9]+}', async c => {
@@ -48,6 +43,7 @@ export const videosRoute = new Hono()
     doc.video = data.video
     doc.title = data.title
     doc.desc = data.desc || ""
+    doc.url = data.url
     doc.views = 0
     doc.createdAt = new Date()
 

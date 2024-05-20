@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api } from '@/lib/rpc';
 import { useForm } from '@tanstack/react-form';
-import { createLazyFileRoute, useRouter } from '@tanstack/react-router';
+import { Link, createLazyFileRoute, useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
 
 export const Route = createLazyFileRoute('/register')({
@@ -85,9 +85,12 @@ function RegisterPage() {
           )}
         />
         <div className="text-right p-0">
-          <span className="border-b text-right border-transparent hover:border-neutral-500 hover:text-neutral-500 cursor-pointer transition text-sm font-medium">
+          <Link
+            to="/login"
+            className="border-b text-right border-transparent hover:border-neutral-500 hover:text-neutral-500 cursor-pointer transition text-sm font-medium"
+          >
             У меня есть аккаунт
-          </span>
+          </Link>
         </div>
         <div className="pt-4 mt-4 border-t">
           <Button variant="outline" size="lg" className="w-full">

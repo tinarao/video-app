@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import VideoCard from '../shared/VideoCard';
+import VideoCard from '../../shared/VideoCard';
 import { User } from '@/types/user';
 import NothingHere from '@/components/containers/NothingHere';
 

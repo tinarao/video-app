@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import VideoCard from '@/components/pages/shared/VideoCard';
+import VideoCard from '@/components/shared/VideoCard';
 import MainLayout from '@/components/layouts/main-layout';
 import NothingHere from '@/components/containers/NothingHere';
 

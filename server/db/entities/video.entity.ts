@@ -15,6 +15,9 @@ export class Video {
     @Column("numeric")
     views: number
 
+    @Column({ type: "text", nullable: true })
+    url: string
+
     @ManyToOne(() => User, (user) => user.videos)
     author: User
 

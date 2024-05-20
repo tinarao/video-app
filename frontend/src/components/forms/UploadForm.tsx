@@ -16,6 +16,7 @@ import {
 import { api } from '@/lib/rpc';
 import { Loader2Icon, Save } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { useRouter } from '@tanstack/react-router';
 
 export const UploadForm = () => {
   const [videoSrc, setVideoSrc] = useState('');
@@ -23,6 +24,7 @@ export const UploadForm = () => {
   const [file, setFile] = useState<File | null>(null);
   const videoRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     if (!file) return;
@@ -45,6 +47,7 @@ export const UploadForm = () => {
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       setLoading(true);
+      const url = nanoid(8);
 
       uploadTask.on(
         'state_changed',
@@ -62,6 +65,7 @@ export const UploadForm = () => {
               const payload = {
                 ...value,
                 video: downloadURL,
+                url: url,
               };
               const res = await api.videos.$post({ json: payload });
               const saved = await res.json();
@@ -71,6 +75,7 @@ export const UploadForm = () => {
               toast.error('Ошибка при сохранении видео');
             } finally {
               setLoading(false);
+              router.navigate({ to: '/' });
             }
           });
         },
