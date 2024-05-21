@@ -45,7 +45,6 @@ function Index() {
           </div>
         ) : (
           <div className="grid grid-cols-4 gap-8">
-            {/* made this to avoid nested ternaries */}
             {(data === undefined || data.length === 0) && (
               <div className="col-span-4 py-48 flex flex-col items-center justify-center gap-8 text-muted-foreground">
                 <NothingHere />

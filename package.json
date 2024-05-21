@@ -4,7 +4,8 @@
   "scripts": {
     "start": "bun server/index.ts",
     "dev": "bun --env-file=server/.env --watch server/index.ts",
-    "format": "bunx prettier . --write"
+    "format": "bunx prettier . --write",
+    "build": "cd frontend && bunx --bun vite build"
   },
   "type": "module",
   "devDependencies": {

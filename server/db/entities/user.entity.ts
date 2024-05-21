@@ -18,10 +18,10 @@ export class User {
     @Column({ type: "text", unique: true })
     username: string // basically its f_name + g_name or reverse idk
 
-    @Column("text")
+    @Column({ type: "text", select: false })
     password: string // basically its f_name + g_name or reverse idk
 
-    @Column({ type: "text", nullable: true })
+    @Column({ type: "text", nullable: false, default: "https://mygardenia.ru/uploads/pers1.jpg" })
     picture: string | null
 
     @Column("timestamptz")
@@ -32,4 +32,7 @@ export class User {
 
     @OneToMany(() => Video, (video) => video.author, { nullable: true })
     videos: Video[]
+
+    @OneToMany(() => Video, (video) => video.likedBy, { nullable: true })
+    likedVideos: Video[]
 }

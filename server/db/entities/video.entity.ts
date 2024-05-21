@@ -12,14 +12,20 @@ export class Video {
     @Column("text")
     video: string
 
-    @Column("numeric")
+    @Column({ type: "numeric", default: 0, nullable: false })
     views: number
+
+    @Column({ type: "numeric", default: 0, nullable: false })
+    likes: number
 
     @Column({ type: "text", nullable: true })
     url: string
 
     @ManyToOne(() => User, (user) => user.videos)
     author: User
+
+    @ManyToOne(() => User, (user) => user.likedVideos)
+    likedBy: User
 
     @Column("text")
     desc: string

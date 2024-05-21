@@ -4,7 +4,7 @@ const MainLayout = ({ children }: { children: JSX.Element }) => {
   return (
     <>
       <Header />
-      {children}
+      <main className="py-4">{children}</main>
     </>
   );
 };

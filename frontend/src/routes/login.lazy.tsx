@@ -37,7 +37,7 @@ function LoginPage() {
         return toast.error('Пользователь с такими данными не существует!');
       } else if (res.status === 400) {
         return toast.error('Неправильный логин и/или пароль!');
-      } else {
+      } else if (res.status === 500) {
         return toast.error('Произошла ошибка, попробуйте ещё раз');
       }
     },

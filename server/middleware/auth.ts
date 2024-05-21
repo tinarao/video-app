@@ -44,7 +44,7 @@ export const auth = createMiddleware<Env>(async (c, next) => {
             return c.json({ "message": "Bad request" }, 403)
         }
 
-        const { password, ...user } = await AppDataSource.manager.findOne(User, {
+        const user = await AppDataSource.manager.findOne(User, {
             where: {
                 id: parseInt(userIdAT)
             }

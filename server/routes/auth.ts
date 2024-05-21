@@ -11,14 +11,13 @@ import { AppDataSource } from "../db/db";
 
 export const authRoute = new Hono()
     .get("/me", async c => {
-        // i am deeply sorry for this one
-        const accessToken = getCookie(c, "access_token")
-        const refreshToken = getCookie(c, "refresh_token")
+        const accessToken = getCookie(c, "access_token");
+        const refreshToken = getCookie(c, "refresh_token");
         if (!accessToken || !refreshToken) {
-            deleteCookie(c, "access_token")
-            deleteCookie(c, "refresh_token")
+            deleteCookie(c, "access_token");
+            deleteCookie(c, "refresh_token");
 
-            return c.json({ "message": "Bad request" }, 401)
+            return c.json({ "message": "Unauthorized" }, 401)
         }
 
         let userID: string
@@ -34,7 +33,7 @@ export const authRoute = new Hono()
             userID = decoded.payload.userID
         }
 
-        const { password, ...user } = await AppDataSource.manager.findOne(User,
+        const user = await AppDataSource.manager.findOne(User,
             {
                 where: {
                     id: parseInt(userID)
@@ -53,6 +52,7 @@ export const authRoute = new Hono()
         setCookie(c, "access_token", newToken, { httpOnly: true })
 
         return c.json({ user })
+
     })
     .post("/register", zValidator('json', AuthDTO), async c => {
         // register logic
@@ -76,34 +76,41 @@ export const authRoute = new Hono()
         return c.json({ ...saved }, 201)
     })
     .post("/login", zValidator('json', AuthDTO), async c => {
+        try {
 
-        const { username, password } = await c.req.json()
-        const user = await AppDataSource.manager.findOne(User, { where: { username: username } })
-        if (!user) {
-            return c.json({ "message": "User does not exist" }, 404)
+            const { username, password } = await c.req.json()
+            const user = await AppDataSource.manager.findOne(User, {
+                where: { username: username }, select: { password: true, username: true, id: true }
+            })
+            if (!user) {
+                return c.json({ "message": "User does not exist" }, 404)
+            }
+
+            const isTruePassword = await bcrypt.compare(password, user.password)
+            if (!isTruePassword) {
+                return c.json({ "message": "Wrong credentials provided" }, 400)
+            }
+
+            const secret = Bun.env.JWT_SECRET
+            const accessToken = await sign({
+                "exp": Math.floor(Date.now() / 1000) + 60 * 20,
+                "userID": user.id
+            }, secret!)
+
+            const refreshToken = await sign({
+                "userID": user.id
+            }, secret!)
+
+            const { password: hashed, ...data } = user
+
+            setCookie(c, "access_token", accessToken, { httpOnly: true })
+            setCookie(c, "refresh_token", refreshToken, { httpOnly: true })
+
+            return c.json({ data }, 200)
+        } catch (error) {
+            console.error(error)
+            return c.text("Internal server error", 500)
         }
-
-        const isTruePassword = await bcrypt.compare(password, user.password)
-        if (!isTruePassword) {
-            return c.json({ "message": "Wrong credentials provided" }, 400)
-        }
-
-        const secret = Bun.env.JWT_SECRET
-        const accessToken = await sign({
-            "exp": Math.floor(Date.now() / 1000) + 60 * 20,
-            "userID": user.id
-        }, secret!)
-
-        const refreshToken = await sign({
-            "userID": user.id
-        }, secret!)
-
-        const { password: hashed, ...data } = user
-
-        setCookie(c, "access_token", accessToken, { httpOnly: true })
-        setCookie(c, "refresh_token", refreshToken, { httpOnly: true })
-
-        return c.json({ data }, 200)
     })
     .get("/logout", async c => {
         deleteCookie(c, "access_token")

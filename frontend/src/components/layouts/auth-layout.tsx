@@ -5,7 +5,7 @@ const AuthLayout = ({ children }: { children: JSX.Element }) => {
         <div className="py-16"></div>
         {children}
       </div>
-      <div className="col-span-4 h-screen bg-[url('./assets/auth-bg.jpg')]"></div>
+      <div className="col-span-4 h-screen bg-[url('./assets/bg-auth.jpg')]"></div>
     </div>
   );
 };
