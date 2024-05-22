@@ -1,6 +1,5 @@
+import Profile from '@/components/containers/Profile';
 import MainLayout from '@/components/layouts/main-layout';
-import FirstInfoBlock from '@/components/pages/profile/FirstInfoBlock';
-import UserVideosBlock from '@/components/pages/profile/UserVideosBlock';
 import { userQueryOpts } from '@/lib/auth';
 import { useQuery } from '@tanstack/react-query';
 import { createLazyFileRoute } from '@tanstack/react-router';
@@ -19,10 +18,7 @@ function About() {
         {isLoading ? (
           <LoaderCircle color="black" size={50} className="animate-spin" />
         ) : (
-          <>
-            <FirstInfoBlock user={user!} />
-            <UserVideosBlock user={user!} />
-          </>
+          <Profile user={user!} />
         )}
       </div>
     </MainLayout>

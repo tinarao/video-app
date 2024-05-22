@@ -1,4 +1,5 @@
 import Header from '@/components/containers/Header';
+import VideoPlayer from '@/components/shared/VideoPlayer';
 import { Button } from '@/components/ui/button';
 import { useLikes } from '@/hooks/useLikes';
 import { api } from '@/lib/rpc';
@@ -92,11 +93,7 @@ function PostComponent() {
           <>
             <div className="col-span-3 py-4">
               <div>
-                <video
-                  className="rounded-md"
-                  src={video!.video}
-                  controls
-                ></video>
+                <VideoPlayer url={video!.video} />
               </div>
               <div className="py-2">
                 <div>

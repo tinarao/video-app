@@ -10,6 +10,7 @@ import { Button } from './button';
 import { api } from '@/lib/rpc';
 import { toast } from 'sonner';
 import { User } from '@/types/user';
+import { Link } from '@tanstack/react-router';
 
 const ProfileDropdown = ({ user }: { user: User }) => {
   const handleLogout = async () => {
@@ -38,9 +39,15 @@ const ProfileDropdown = ({ user }: { user: User }) => {
       <DropdownMenuContent>
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>Billing</DropdownMenuItem>
-        <DropdownMenuItem>Team</DropdownMenuItem>
-        <DropdownMenuItem>Subscription</DropdownMenuItem>
+        <DropdownMenuItem asChild className="cursor-pointer">
+          <Link to="/profile">Мой профиль</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link to="/dashboard">Дашборд</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem>
+          <Link to="/upload">Загрузить видео</Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
           Выйти

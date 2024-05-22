@@ -27,6 +27,9 @@ const AuthenticatedUploadLazyImport = createFileRoute(
 const AuthenticatedProfileLazyImport = createFileRoute(
   '/_authenticated/profile',
 )()
+const AuthenticatedDashboardLazyImport = createFileRoute(
+  '/_authenticated/dashboard',
+)()
 
 // Create/Update Routes
 
@@ -64,6 +67,15 @@ const AuthenticatedProfileLazyRoute = AuthenticatedProfileLazyImport.update({
   import('./routes/_authenticated/profile.lazy').then((d) => d.Route),
 )
 
+const AuthenticatedDashboardLazyRoute = AuthenticatedDashboardLazyImport.update(
+  {
+    path: '/dashboard',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any,
+).lazy(() =>
+  import('./routes/_authenticated/dashboard.lazy').then((d) => d.Route),
+)
+
 const VideoVideoIDRoute = VideoVideoIDImport.update({
   path: '/video/$videoID',
   getParentRoute: () => rootRoute,
@@ -93,6 +105,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideoVideoIDImport
       parentRoute: typeof rootRoute
     }
+    '/_authenticated/dashboard': {
+      preLoaderRoute: typeof AuthenticatedDashboardLazyImport
+      parentRoute: typeof AuthenticatedImport
+    }
     '/_authenticated/profile': {
       preLoaderRoute: typeof AuthenticatedProfileLazyImport
       parentRoute: typeof AuthenticatedImport
@@ -109,6 +125,7 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren([
   IndexLazyRoute,
   AuthenticatedRoute.addChildren([
+    AuthenticatedDashboardLazyRoute,
     AuthenticatedProfileLazyRoute,
     AuthenticatedUploadLazyRoute,
   ]),

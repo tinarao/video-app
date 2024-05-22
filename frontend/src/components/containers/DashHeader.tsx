@@ -5,7 +5,7 @@ import { Link } from '@tanstack/react-router';
 import ProfileDropdown from '../ui/profile-dropdown';
 import Logo from '../Logo';
 
-const Header = () => {
+const DashHeader = () => {
   const { data: user } = useQuery(userQueryOpts);
 
   return (
@@ -15,13 +15,15 @@ const Header = () => {
           <Link to="/">
             <Logo size={10} />
           </Link>
-          {/* <ul className="flex gap-1">
+          <ul className="flex gap-1">
             <li>
               <Button
                 asChild
                 variant="ghost"
                 className="[&.active]:bg-neutral-200/50"
-              ></Button>
+              >
+                <Link to="/dashboard/videos">Мои видео</Link>
+              </Button>
             </li>
             <li>
               <Button
@@ -29,10 +31,10 @@ const Header = () => {
                 variant="ghost"
                 className="[&.active]:bg-neutral-200/50"
               >
-                <Link to="/profile">Мой профиль</Link>
+                <Link to="/dashboard/profile">Мой профиль</Link>
               </Button>
             </li>
-          </ul> */}
+          </ul>
         </nav>
         <div>
           {user ? (
@@ -48,4 +50,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default DashHeader;
