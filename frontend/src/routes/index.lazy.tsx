@@ -21,10 +21,10 @@ function Index() {
     const time = performance.now();
 
     const data = await api.videos.$get();
-    const vids = await data.json();
+    const { videos } = await data.json();
 
     setMetric(performance.now() - time);
-    return vids.data;
+    return videos;
   };
 
   const { data, isLoading, isFetched } = useQuery({

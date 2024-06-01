@@ -9,7 +9,7 @@ const DashHeader = () => {
   const { data: user } = useQuery(userQueryOpts);
 
   return (
-    <header className="border-b">
+    <header className="border-b h-16">
       <div className="container flex justify-between items-center py-2 text-neutral-800">
         <nav className="flex items-center">
           <Link to="/">

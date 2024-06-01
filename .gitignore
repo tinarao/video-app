@@ -3,6 +3,7 @@ frontend/node_modules
 
 frontend/.env
 server/.env
+server/prisma/migrations
 server/config/auth.ts
 server/db/db.ts
 

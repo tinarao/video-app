@@ -27,8 +27,14 @@ const AuthenticatedUploadLazyImport = createFileRoute(
 const AuthenticatedProfileLazyImport = createFileRoute(
   '/_authenticated/profile',
 )()
-const AuthenticatedDashboardLazyImport = createFileRoute(
-  '/_authenticated/dashboard',
+const AuthenticatedDashboardIndexLazyImport = createFileRoute(
+  '/_authenticated/dashboard/',
+)()
+const AuthenticatedDashboardVideosIndexLazyImport = createFileRoute(
+  '/_authenticated/dashboard/videos/',
+)()
+const AuthenticatedDashboardProfileIndexLazyImport = createFileRoute(
+  '/_authenticated/dashboard/profile/',
 )()
 
 // Create/Update Routes
@@ -67,19 +73,38 @@ const AuthenticatedProfileLazyRoute = AuthenticatedProfileLazyImport.update({
   import('./routes/_authenticated/profile.lazy').then((d) => d.Route),
 )
 
-const AuthenticatedDashboardLazyRoute = AuthenticatedDashboardLazyImport.update(
-  {
-    path: '/dashboard',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any,
-).lazy(() =>
-  import('./routes/_authenticated/dashboard.lazy').then((d) => d.Route),
-)
-
 const VideoVideoIDRoute = VideoVideoIDImport.update({
   path: '/video/$videoID',
   getParentRoute: () => rootRoute,
 } as any)
+
+const AuthenticatedDashboardIndexLazyRoute =
+  AuthenticatedDashboardIndexLazyImport.update({
+    path: '/dashboard/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/dashboard/index.lazy').then((d) => d.Route),
+  )
+
+const AuthenticatedDashboardVideosIndexLazyRoute =
+  AuthenticatedDashboardVideosIndexLazyImport.update({
+    path: '/dashboard/videos/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/dashboard/videos/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
+
+const AuthenticatedDashboardProfileIndexLazyRoute =
+  AuthenticatedDashboardProfileIndexLazyImport.update({
+    path: '/dashboard/profile/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any).lazy(() =>
+    import('./routes/_authenticated/dashboard/profile/index.lazy').then(
+      (d) => d.Route,
+    ),
+  )
 
 // Populate the FileRoutesByPath interface
 
@@ -105,16 +130,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VideoVideoIDImport
       parentRoute: typeof rootRoute
     }
-    '/_authenticated/dashboard': {
-      preLoaderRoute: typeof AuthenticatedDashboardLazyImport
-      parentRoute: typeof AuthenticatedImport
-    }
     '/_authenticated/profile': {
       preLoaderRoute: typeof AuthenticatedProfileLazyImport
       parentRoute: typeof AuthenticatedImport
     }
     '/_authenticated/upload': {
       preLoaderRoute: typeof AuthenticatedUploadLazyImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/dashboard/': {
+      preLoaderRoute: typeof AuthenticatedDashboardIndexLazyImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/dashboard/profile/': {
+      preLoaderRoute: typeof AuthenticatedDashboardProfileIndexLazyImport
+      parentRoute: typeof AuthenticatedImport
+    }
+    '/_authenticated/dashboard/videos/': {
+      preLoaderRoute: typeof AuthenticatedDashboardVideosIndexLazyImport
       parentRoute: typeof AuthenticatedImport
     }
   }
@@ -125,9 +158,11 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren([
   IndexLazyRoute,
   AuthenticatedRoute.addChildren([
-    AuthenticatedDashboardLazyRoute,
     AuthenticatedProfileLazyRoute,
     AuthenticatedUploadLazyRoute,
+    AuthenticatedDashboardIndexLazyRoute,
+    AuthenticatedDashboardProfileIndexLazyRoute,
+    AuthenticatedDashboardVideosIndexLazyRoute,
   ]),
   LoginLazyRoute,
   RegisterLazyRoute,

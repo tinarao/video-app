@@ -18,6 +18,7 @@ function RegisterPage() {
     defaultValues: {
       username: '',
       password: '',
+      email: '',
     },
     onSubmit: async ({ value }) => {
       if (value.password === '' || value.password === '') {
@@ -62,6 +63,21 @@ function RegisterPage() {
               <Label>Имя пользователя</Label>
               <Input
                 name={f.name}
+                value={f.state.value}
+                onBlur={f.handleBlur}
+                onChange={(e) => f.handleChange(e.target.value)}
+              />
+            </div>
+          )}
+        />
+        <form.Field
+          name="email"
+          children={(f) => (
+            <div>
+              <Label>E-mail</Label>
+              <Input
+                name={f.name}
+                type="email"
                 value={f.state.value}
                 onBlur={f.handleBlur}
                 onChange={(e) => f.handleChange(e.target.value)}

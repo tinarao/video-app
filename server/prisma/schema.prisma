@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("PG_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  family_name String?
+  given_name  String?
+  bio         String?
+  username    String
+  password    String
+  picture     String   @default("https://amu.edu.kz/upload/default-avatar.jpg")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isVerified  Boolean  @default(false)
+
+  likedVideos Video[] @relation("likes")
+  videos      Video[] @relation("videos")
+}
+
+model Video {
+  id        Int      @id @default(autoincrement())
+  title     String
+  video     String
+  views     Int      @default(0)
+  likes     Int      @default(0)
+  url       String
+  desc      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  likedBy User[] @relation("likes")
+
+  authorID Int
+  author   User @relation("videos", fields: [authorID], references: [id])
+}

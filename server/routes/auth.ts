@@ -3,11 +3,11 @@ import { env } from "bun";
 import { Hono } from "hono";
 import { setCookie, getCookie, deleteCookie } from 'hono/cookie';
 import { decode, sign, verify } from "hono/jwt";
-import { AuthDTO } from "../dto/auth.dto";
+import { LoginDTO, RegisterDTO } from "../dto/auth.dto";
 
 import * as bcrypt from "bcrypt"
-import { User } from "../db/entities/user.entity";
-import { AppDataSource } from "../db/db";
+
+import prisma from "../prisma/db"
 
 export const authRoute = new Hono()
     .get("/me", async c => {
@@ -23,6 +23,8 @@ export const authRoute = new Hono()
         let userID: string
 
         try {
+            // bun.verify кидает ошибку, если токен не проходит проверку
+            // поэтому, чтобы всё дело работало, мне пришлось написать это уёбище
             await verify(accessToken!, Bun.env.JWT_SECRET!)
 
             const decoded = decode(accessToken)
@@ -33,54 +35,60 @@ export const authRoute = new Hono()
             userID = decoded.payload.userID
         }
 
-        const user = await AppDataSource.manager.findOne(User,
-            {
-                where: {
-                    id: parseInt(userID)
-                }
-            }
-        )
-        if (!user) {
+        const userDoc = await prisma.user.findFirst({
+            where: { id: parseInt(userID) },
+            include: { videos: true }
+        })
+        if (!userDoc) {
             return c.json({ "message": "Bad request" }, 400)
         }
 
         deleteCookie(c, "access_token")
         const newToken = await sign({
             "exp": Math.floor(Date.now() / 1000) + 60 * 20,
-            "userID": user.id
+            "userID": userDoc.id
         }, Bun.env.JWT_SECRET!)
         setCookie(c, "access_token", newToken, { httpOnly: true })
 
+        const { password, ...user } = userDoc;
         return c.json({ user })
 
     })
-    .post("/register", zValidator('json', AuthDTO), async c => {
-        // register logic
-        const { username, password: passwordNotHashed } = await c.req.json()
-
-        const isUserExist = await AppDataSource.manager.findOne(User, { where: { username: username } })
-        if (!!isUserExist) {
-            return c.json({ "message": "User with such credentials already exist" }, 400)
-        }
-
-        const salt = await bcrypt.genSalt(10)
-        const password = await bcrypt.hash(passwordNotHashed, salt)
-
-        const user = new User()
-        user.username = username
-        user.password = password
-        user.createdAt = new Date()
-
-        const { password: hp, ...saved } = await AppDataSource.manager.save(user)
-
-        return c.json({ ...saved }, 201)
-    })
-    .post("/login", zValidator('json', AuthDTO), async c => {
+    .post("/register", zValidator('json', RegisterDTO), async c => {
         try {
+            const { username, password: passwordNotHashed, email } = await c.req.json()
+            const isUserExist = await prisma.user.findFirst({
+                where: { email: email }
+            })
+            if (!!isUserExist) {
+                return c.json({ "message": "User with such credentials already exist" }, 400)
+            }
 
+            const salt = await bcrypt.genSalt(10)
+            const password = await bcrypt.hash(passwordNotHashed, salt)
+
+            const createdUser = await prisma.user.create({
+                data: {
+                    username: username,
+                    email: email,
+                    password: password,
+                }
+            })
+
+            const { password: hp, ...saved } = createdUser;
+
+            return c.json({ ...saved }, 201)
+        } catch (error) {
+            console.error(error);
+            return c.json({ "message": "An error occured while registering a user" }, 500);
+        }
+    })
+    .post("/login", zValidator('json', LoginDTO), async c => {
+        try {
             const { username, password } = await c.req.json()
-            const user = await AppDataSource.manager.findOne(User, {
-                where: { username: username }, select: { password: true, username: true, id: true }
+            const user = await prisma.user.findFirst({
+                where: { username: username },
+                select: { id: true, password: true },
             })
             if (!user) {
                 return c.json({ "message": "User does not exist" }, 404)
@@ -108,8 +116,8 @@ export const authRoute = new Hono()
 
             return c.json({ data }, 200)
         } catch (error) {
-            console.error(error)
-            return c.text("Internal server error", 500)
+            console.error(error);
+            return c.json({ "message": "Internal server error" }, 500)
         }
     })
     .get("/logout", async c => {

@@ -12,8 +12,8 @@ app.use(logger());
 app.get('/hc', (c) => c.text('дышим!', 200));
 const apiRoutes = app
     .basePath('/api')
-    .route('/videos', videosRoute)
     .route("/auth", authRoute)
+    .route('/videos', videosRoute)
 
 // static
 app.get('*', serveStatic({ root: './frontend/dist' }));

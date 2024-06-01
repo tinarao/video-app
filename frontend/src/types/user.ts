@@ -1,13 +1,12 @@
-import { Video } from "@server/db/entities/video.entity"
-
 export interface User {
-    id: number
-    email: string | null
-    family_name: string | null
-    given_name: string | null
-    username: string
-    picture: string | null
-    createdAt: Date | string
-    isVerified: boolean
-    videos: Video[]
+    id: number;
+    email: string;
+    family_name: string | null;
+    given_name: string | null;
+    username: string;
+    bio: string | null;
+    picture: string | null;
+    createdAt: Date | string;
+    updatedAt: Date | string;
+    isVerified: boolean;
 }

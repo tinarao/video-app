@@ -2,6 +2,7 @@ import Header from '@/components/containers/Header';
 import VideoPlayer from '@/components/shared/VideoPlayer';
 import { Button } from '@/components/ui/button';
 import { useLikes } from '@/hooks/useLikes';
+import { userQueryOpts } from '@/lib/auth';
 import { api } from '@/lib/rpc';
 import { cn, viewsHandler } from '@/lib/utils';
 import { queryClient } from '@/main';
@@ -16,6 +17,7 @@ export const Route = createFileRoute('/video/$videoID')({
 });
 
 function PostComponent() {
+  const { data: user } = useQuery(userQueryOpts);
   const [metric, setMetric] = useState(0);
   const { videoID } = Route.useParams();
   const { likedVideos, addLikedVideo, removeLikedVideo } = useLikes();
@@ -23,7 +25,6 @@ function PostComponent() {
     data: video,
     isLoading,
     isSuccess,
-    error,
     isError,
   } = useQuery({
     queryKey: ['video_page', videoID],
@@ -63,11 +64,17 @@ function PostComponent() {
   });
 
   if (isError) {
-    console.error(error);
     return <Navigate to="/" />;
   }
 
   const likeHandler = () => {
+    if (!user) {
+      return toast.message('Вы не авторизованы!', {
+        description: 'Авторизуйтесь, чтобы получить возможность лайкать видео',
+        icon: '😕',
+      });
+    }
+
     const isLiked = likedVideos.includes(video!.id);
 
     if (!isLiked) {

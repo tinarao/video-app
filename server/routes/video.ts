@@ -3,128 +3,171 @@ import { zValidator } from '@hono/zod-validator';
 
 import { z } from 'zod';
 import { auth } from '../middleware/auth';
-import { AppDataSource } from '../db/db';
-import { Video } from '../db/entities/video.entity';
-import { User } from '../db/entities/user.entity';
+import type { Video } from '@prisma/client';
 
 const addVideoDTO = z.object({
-  title: z.string().min(1).max(50),
-  video: z.string(),
-  desc: z.optional(z.string()),
-  url: z.string()
+    title: z.string().min(1).max(50),
+    video: z.string(),
+    desc: z.optional(z.string()),
+    url: z.string()
 });
 
 export const videosRoute = new Hono()
-  .get('/', async (c) => {
+    .get("/", async c => {
+        const videos = await prisma.video.findMany({
+            take: 10
+        });
+        return c.json({ videos })
+    })
+    .get('/:url', async (c) => {
+        const url = c.req.param('url');
 
-    const vids = await AppDataSource.manager.find(Video)
+        const foundVid = await prisma.video.findFirst({
+            where: { url: url },
+            include: { author: true }
+        })
 
-    return c.json({ data: vids });
-  })
+        if (foundVid === null) return c.json({ foundVid }, 404)
+        return c.json({ foundVid }, 200);
+    })
 
-  .get('/:url', async (c) => {
-    const url = c.req.param('url');
-    const foundVid = await AppDataSource.manager.findOne(Video, { where: { url: url }, relations: ['author'] })
-    if (foundVid === null) return c.json({ foundVid }, 404)
-    return c.json({ foundVid }, 200);
-  })
+    .get('/by-user/:userID{[0-9]+}', async c => {
+        const userID = c.req.param('userID')
+        const videos = await prisma.video.findMany({
+            where: { author: { id: parseInt(userID) } }
+        })
 
-  .get('/by-user/:userID{[0-9]+}', async c => {
-    const userID = c.req.param('userID')
-    const videos = await AppDataSource.manager.find(Video, { where: { author: { id: parseInt(userID) } } })
+        return c.json({ videos }, 200)
+    })
 
-    return c.json({ videos }, 200)
-  })
+    .post('/', auth, zValidator('json', addVideoDTO), async (c) => {
+        const user = c.var.user
+        const data = addVideoDTO.parse(await c.req.json())
+        const author = await prisma.user.findFirst({
+            where: { id: user.id },
+            include: { videos: true }
+        })
+        if (!author) {
+            return c.json({ "message": "Bad request" }, 401);
+        }
 
-  .post('/', auth, zValidator('json', addVideoDTO), async (c) => {
-    const user = c.var.user
-    const data = addVideoDTO.parse(await c.req.json())
-    const author = await AppDataSource.manager.findOne(User, { where: { id: user.id } })
+        // create video
+        // add video to author.videos
 
-    const doc = new Video()
-    doc.video = data.video
-    doc.title = data.title
-    doc.desc = data.desc || ""
-    doc.url = data.url
-    doc.views = 0
-    // @ts-ignore
-    doc.author = user
-    doc.createdAt = new Date()
+        const savedVideo = await prisma.video.create({
+            data: {
+                video: data.video,
+                title: data.title,
+                url: data.url,
+                views: 0,
+                authorID: author.id,
+            }
+        })
 
-    if (!author!.videos) {
-      author!.videos = [doc]
-    }
+        const savedUser = await prisma.user.findFirst({
+            where: { id: user.id },
+            include: { videos: true }
+        })
 
-    author!.videos.push(doc)
+        return c.json({ savedVideo, savedUser });
+    })
 
-    try {
-      const savedVideo = await AppDataSource.manager.save(doc)
-      const savedUser = await AppDataSource.manager.save(author)
-      return c.json({ savedVideo, savedUser }, 201);
-    } catch (error) {
-      console.log(error)
-      return c.json({ "message": "ISE" }, 500)
-    }
-  })
+    .delete('/:id{[0-9]+}', auth, zValidator('json', addVideoDTO), async (c) => {
+        return c.json({ 'm': "wip" })
+    })
 
-  .delete('/:id{[0-9]+}', auth, zValidator('json', addVideoDTO), async (c) => {
-    return c.json({ 'm': "wip" })
-  })
+    .patch("/like/:id{[0-9]+}/:isLiking", auth, async c => {
+        const user = c.var.user
+        const id = c.req.param('id')
+        const isLiking = c.req.param('isLiking')
+        const LikeActions = ["like", "dislike"]
+        if (!LikeActions.includes(isLiking)) {
+            return c.json({ "message": "Invalid action" }, 400)
+        }
 
-  .patch("/like/:id{[0-9]+}/:isLiking", auth, async c => {
-    const user = c.var.user
-    const id = c.req.param('id')
-    const isLiking = c.req.param('isLiking')
-    const LikeActions = ["like", "dislike"]
-    if (!LikeActions.includes(isLiking)) {
-      return c.json({ "message": "Invalid action" })
-    }
+        if (isLiking === "like") {
+            const userDoc = await prisma.user.findFirst({
+                where: { id: user.id },
+            })
+            if (!userDoc) {
+                return c.redirect("/logout");
+            }
 
-    if (isLiking === "like") {
-      const videoDoc = await AppDataSource.manager.findOne(Video, { where: { id: parseInt(id) } })
-      if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
+            const videoDoc = await prisma.video.findFirst({
+                where: { id: parseInt(id) }
+            })
+            if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
 
-      const userDoc = await AppDataSource.manager.findOne(User, { where: { id: user.id } })
-      if (!userDoc) return c.redirect("/logout")
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { likedVideos: { connect: videoDoc } }
+            })
 
-      if (!userDoc.likedVideos) {
-        userDoc.likedVideos = [videoDoc]
-      }
+            const updatedVideo = await prisma.video.update({
+                where: { id: parseInt(id) },
+                data: { likes: { increment: 1 }, likedBy: { connect: userDoc } }
+            })
 
-      userDoc.likedVideos.push(videoDoc)
-      videoDoc.likes++
+            return c.json({ updatedVideo }, 201)
+        } else {
+            // if dislike
+            // 4 requests to db only to dislike a video
+            // shiet
 
-      const savedVid = await AppDataSource.manager.save(videoDoc)
-      const savedUser = await AppDataSource.manager.save(userDoc)
+            const userDoc = await prisma.user.findFirst({
+                where: { id: user.id },
+                // include: { likedVideos: true }
+            })
+            if (!userDoc) {
+                return c.redirect("/logout");
+            }
 
-      return c.json({ savedVid }, 201)
-    } else {
-      const videoDoc = await AppDataSource.manager.findOne(Video, { where: { id: parseInt(id) } })
-      if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
+            const videoDoc = await prisma.video.findFirst({
+                where: { id: parseInt(id) }
+            })
+            if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
 
-      const userDoc = await AppDataSource.manager.findOne(User, { where: { id: user.id } })
-      if (!userDoc) return c.redirect("/logout")
+            await prisma.user.update({
+                where: { id: user.id },
+                data: { likedVideos: { disconnect: videoDoc } }
+            })
 
-      if (!userDoc.likedVideos) {
-        userDoc.likedVideos = [videoDoc]
-      }
+            const updatedVideo = await prisma.video.update({
+                where: { id: parseInt(id) },
+                data: { likedBy: { disconnect: userDoc }, likes: { decrement: 1 } }
+            })
 
-      userDoc.likedVideos = userDoc.likedVideos.filter(i => i !== videoDoc)
-      videoDoc.likes--
+            return c.json({ updatedVideo }, 201)
+        }
+    })
 
-      const savedVid = await AppDataSource.manager.save(videoDoc)
-      const savedUser = await AppDataSource.manager.save(userDoc)
+    .patch("/view/:id{[0-9]+}", async c => {
+        const videoID = c.req.param('id')
 
-      return c.json({ savedVid }, 201)
-    }
-  })
+        const videoDoc = await prisma.video.findFirst({
+            where: { id: parseInt(videoID) },
+            select: { id: true, views: true }
+        })
+        if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
 
-  .patch("/view/:id{[0-9]+}", async c => {
-    const videoID = c.req.param('id')
-    const videoDoc = await AppDataSource.manager.findOne(Video, { where: { id: parseInt(videoID) } })
-    if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
-    videoDoc.views++
+        const updatedVideo = await prisma.video.update({
+            where: { id: videoDoc.id },
+            data: { views: { increment: 1 } }
+        })
 
-    const saved = await AppDataSource.manager.save(videoDoc)
-    return c.json({ saved }, 201)
-  })
+        return c.json({ updatedVideo }, 201)
+    })
+
+    .get("/liked/:userID", async c => {
+        const userID = c.req.param('userID');
+
+        const userDoc = await prisma.user.findFirst({
+            where: { id: parseInt(userID) },
+            include: { likedVideos: true }
+        })
+        if (!userDoc) {
+            return c.json({}, 404)
+        }
+
+        return c.json({ videos: userDoc?.likedVideos })
+    })

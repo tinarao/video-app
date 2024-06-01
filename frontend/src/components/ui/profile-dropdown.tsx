@@ -37,7 +37,7 @@ const ProfileDropdown = ({ user }: { user: User }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuLabel>{user.username}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild className="cursor-pointer">
           <Link to="/profile">Мой профиль</Link>

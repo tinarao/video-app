@@ -10,7 +10,6 @@
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
-    "drizzle-kit": "^0.21.1",
     "prettier": "3.2.5"
   },
   "peerDependencies": {
@@ -18,16 +17,14 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.2.1",
-    "@kinde-oss/kinde-typescript-sdk": "^2.9.0",
-    "@supabase/supabase-js": "^2.43.2",
+    "@prisma/client": "5.14.0",
     "@types/bcrypt": "^5.0.2",
     "bcrypt": "^5.1.1",
-    "drizzle-orm": "^0.30.10",
     "hono": "^4.3.5",
     "pg": "^8.11.5",
     "postgres": "^3.4.4",
+    "prisma": "^5.14.0",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.20",
     "zod": "^3.23.8"
   }
 }

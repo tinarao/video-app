@@ -6,10 +6,10 @@ import { createLazyFileRoute } from '@tanstack/react-router';
 import { LoaderCircle } from 'lucide-react';
 
 export const Route = createLazyFileRoute('/_authenticated/profile')({
-  component: About,
+  component: ProfilePage,
 });
 
-function About() {
+function ProfilePage() {
   const { isLoading, data: user } = useQuery(userQueryOpts);
 
   return (
