@@ -3,6 +3,7 @@ import { logger } from 'hono/logger';
 import { serveStatic } from 'hono/bun';
 import { videosRoute } from './routes/video';
 import { authRoute } from './routes/auth';
+import { playlistsRoute } from './routes/playlists'
 
 const app = new Hono();
 // mw
@@ -14,6 +15,7 @@ const apiRoutes = app
     .basePath('/api')
     .route("/auth", authRoute)
     .route('/videos', videosRoute)
+    .route('/playlists', playlistsRoute)
 
 // static
 app.get('*', serveStatic({ root: './frontend/dist' }));

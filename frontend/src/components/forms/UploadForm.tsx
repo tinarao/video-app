@@ -17,11 +17,21 @@ import { api } from '@/lib/rpc';
 import { Loader2Icon, Save } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useRouter } from '@tanstack/react-router';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export const UploadForm = () => {
   const [videoSrc, setVideoSrc] = useState('');
   const [progress, setProgress] = useState<number>(0);
   const [file, setFile] = useState<File | null>(null);
+  const [tags, setTags] = useState<string>('');
+  const [category, setCategory] = useState<string>('Прочее');
   const videoRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -62,10 +72,14 @@ export const UploadForm = () => {
         async () => {
           getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
             try {
+              const tagsArr = tags.split(',');
+
               const payload = {
                 ...value,
                 video: downloadURL,
                 url: url,
+                tags: tagsArr,
+                category: category,
               };
               const res = await api.videos.$post({ json: payload });
               const saved = await res.json();
@@ -82,6 +96,9 @@ export const UploadForm = () => {
       );
     },
   });
+
+  // debug
+  console.log('Category', category);
 
   return (
     <div>
@@ -127,6 +144,30 @@ export const UploadForm = () => {
               </div>
             )}
           />
+          <div>
+            <Select onValueChange={(v) => setCategory(v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Категория" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Музыка">Музыка</SelectItem>
+                <SelectItem value="Игры">Игры</SelectItem>
+                <SelectItem value="Коты и собачки">Коты и собачки</SelectItem>
+                <SelectItem value="Красота и здоровье">
+                  Красота и здоровье
+                </SelectItem>
+                <SelectSeparator />
+                <SelectItem value="Прочее">Прочее</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Input
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="Теги через запятую"
+            />
+          </div>
           <div>
             <Input
               type="file"

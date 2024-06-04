@@ -23,8 +23,24 @@ model User {
   updatedAt   DateTime @updatedAt
   isVerified  Boolean  @default(false)
 
-  likedVideos Video[] @relation("likes")
-  videos      Video[] @relation("videos")
+  likedVideos Video[]    @relation("likes")
+  videos      Video[]    @relation("videos")
+  playlists   Playlist[]
+}
+
+model Playlist {
+  id       Int     @id @default(autoincrement())
+  title    String
+  desc     String?
+  isPublic Boolean @default(true) // public - true; private - false;
+  videos   Video[] @relation("playlists")
+  url      String  @unique
+
+  author   User @relation(fields: [authorID], references: [id])
+  authorID Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Video {
@@ -33,12 +49,16 @@ model Video {
   video     String
   views     Int      @default(0)
   likes     Int      @default(0)
-  url       String
+  url       String   @unique
   desc      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  isHidden  Boolean  @default(false)
+  category  String   @default("Прочее")
+  tags      String[] @default([])
 
-  likedBy User[] @relation("likes")
+  likedBy   User[]     @relation("likes")
+  playlists Playlist[] @relation("playlists")
 
   authorID Int
   author   User @relation("videos", fields: [authorID], references: [id])

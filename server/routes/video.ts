@@ -3,19 +3,21 @@ import { zValidator } from '@hono/zod-validator';
 
 import { z } from 'zod';
 import { auth } from '../middleware/auth';
-import type { Video } from '@prisma/client';
 
 const addVideoDTO = z.object({
     title: z.string().min(1).max(50),
-    video: z.string(),
     desc: z.optional(z.string()),
-    url: z.string()
+    url: z.string(),
+    video: z.string(),
+    tags: z.array(z.string()),
+    category: z.string().min(1).max(30)
 });
 
 export const videosRoute = new Hono()
     .get("/", async c => {
         const videos = await prisma.video.findMany({
-            take: 10
+            take: 10,
+            where: { isHidden: false }
         });
         return c.json({ videos })
     })
@@ -24,7 +26,7 @@ export const videosRoute = new Hono()
 
         const foundVid = await prisma.video.findFirst({
             where: { url: url },
-            include: { author: true }
+            include: { author: { select: { id: true, username: true, picture: true } } }
         })
 
         if (foundVid === null) return c.json({ foundVid }, 404)
@@ -40,6 +42,36 @@ export const videosRoute = new Hono()
         return c.json({ videos }, 200)
     })
 
+    .patch("/access/:videoID{[0-9]+}/:action", auth, async c => {
+        const user = c.var.user;
+        const action = c.req.param('action');
+        const actionsArr = ["hide", "show"]
+        const videoID = parseInt(c.req.param('videoID'));
+
+        if (!actionsArr.includes(action)) {
+            return c.json({ "message": "Invalid action" }, 400);
+        }
+
+        const videoDoc = await prisma.video.findFirst({
+            where: { id: videoID }
+        })
+        if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
+
+        if (videoDoc.authorID !== user.id) {
+            return c.json({ "message": "Forbidden" }, 403);
+        }
+
+        const isH = action === "show" ? false : true;
+
+        const updatedVideoDoc = await prisma.video.update({
+            where: { id: videoDoc.id },
+            data: { isHidden: isH }
+        })
+
+        return c.json({ updatedVideoDoc }, 201);
+
+    })
+
     .post('/', auth, zValidator('json', addVideoDTO), async (c) => {
         const user = c.var.user
         const data = addVideoDTO.parse(await c.req.json())
@@ -51,9 +83,6 @@ export const videosRoute = new Hono()
             return c.json({ "message": "Bad request" }, 401);
         }
 
-        // create video
-        // add video to author.videos
-
         const savedVideo = await prisma.video.create({
             data: {
                 video: data.video,
@@ -61,6 +90,8 @@ export const videosRoute = new Hono()
                 url: data.url,
                 views: 0,
                 authorID: author.id,
+                category: data.category,
+                tags: data.tags,
             }
         })
 
@@ -77,68 +108,69 @@ export const videosRoute = new Hono()
     })
 
     .patch("/like/:id{[0-9]+}/:isLiking", auth, async c => {
-        const user = c.var.user
-        const id = c.req.param('id')
-        const isLiking = c.req.param('isLiking')
-        const LikeActions = ["like", "dislike"]
-        if (!LikeActions.includes(isLiking)) {
-            return c.json({ "message": "Invalid action" }, 400)
-        }
+        return c.text("WIP")
+        // const user = c.var.user
+        // const id = c.req.param('id')
+        // const isLiking = c.req.param('isLiking')
+        // const LikeActions = ["like", "dislike"]
+        // if (!LikeActions.includes(isLiking)) {
+        //     return c.json({ "message": "Invalid action" }, 400)
+        // }
 
-        if (isLiking === "like") {
-            const userDoc = await prisma.user.findFirst({
-                where: { id: user.id },
-            })
-            if (!userDoc) {
-                return c.redirect("/logout");
-            }
+        // if (isLiking === "like") {
+        //     const userDoc = await prisma.user.findFirst({
+        //         where: { id: user.id },
+        //     })
+        //     if (!userDoc) {
+        //         return c.redirect("/logout");
+        //     }
 
-            const videoDoc = await prisma.video.findFirst({
-                where: { id: parseInt(id) }
-            })
-            if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
+        //     const videoDoc = await prisma.video.findFirst({
+        //         where: { id: parseInt(id) }
+        //     })
+        //     if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
 
-            await prisma.user.update({
-                where: { id: user.id },
-                data: { likedVideos: { connect: videoDoc } }
-            })
+        //     await prisma.user.update({
+        //         where: { id: user.id },
+        //         data: { likedVideos: { connect: videoDoc } }
+        //     })
 
-            const updatedVideo = await prisma.video.update({
-                where: { id: parseInt(id) },
-                data: { likes: { increment: 1 }, likedBy: { connect: userDoc } }
-            })
+        //     const updatedVideo = await prisma.video.update({
+        //         where: { id: parseInt(id) },
+        //         data: { likes: { increment: 1 }, likedBy: { connect: userDoc } }
+        //     })
 
-            return c.json({ updatedVideo }, 201)
-        } else {
-            // if dislike
-            // 4 requests to db only to dislike a video
-            // shiet
+        //     return c.json({ updatedVideo }, 201)
+        // } else {
+        //     // if dislike
+        //     // 4 requests to db only to dislike a video
+        //     // shiet
 
-            const userDoc = await prisma.user.findFirst({
-                where: { id: user.id },
-                // include: { likedVideos: true }
-            })
-            if (!userDoc) {
-                return c.redirect("/logout");
-            }
+        //     const userDoc = await prisma.user.findFirst({
+        //         where: { id: user.id },
+        //         // include: { likedVideos: true }
+        //     })
+        //     if (!userDoc) {
+        //         return c.redirect("/logout");
+        //     }
 
-            const videoDoc = await prisma.video.findFirst({
-                where: { id: parseInt(id) }
-            })
-            if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
+        //     const videoDoc = await prisma.video.findFirst({
+        //         where: { id: parseInt(id) }
+        //     })
+        //     if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
 
-            await prisma.user.update({
-                where: { id: user.id },
-                data: { likedVideos: { disconnect: videoDoc } }
-            })
+        //     await prisma.user.update({
+        //         where: { id: user.id },
+        //         data: { likedVideos: { disconnect: videoDoc } }
+        //     })
 
-            const updatedVideo = await prisma.video.update({
-                where: { id: parseInt(id) },
-                data: { likedBy: { disconnect: userDoc }, likes: { decrement: 1 } }
-            })
+        //     const updatedVideo = await prisma.video.update({
+        //         where: { id: parseInt(id) },
+        //         data: { likedBy: { disconnect: userDoc }, likes: { decrement: 1 } }
+        //     })
 
-            return c.json({ updatedVideo }, 201)
-        }
+        //     return c.json({ updatedVideo }, 201)
+        // }
     })
 
     .patch("/view/:id{[0-9]+}", async c => {

@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createLazyFileRoute } from '@tanstack/react-router';
 import { LoaderCircle } from 'lucide-react';
 
-export const Route = createLazyFileRoute('/_authenticated/profile')({
+export const Route = createLazyFileRoute('/_authenticated/profile/')({
   component: ProfilePage,
 });
 

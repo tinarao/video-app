@@ -19,6 +19,7 @@ export const Route = createFileRoute('/video/$videoID')({
 function PostComponent() {
   const { data: user } = useQuery(userQueryOpts);
   const [metric, setMetric] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
   const { videoID } = Route.useParams();
   const { likedVideos, addLikedVideo, removeLikedVideo } = useLikes();
   const {
@@ -36,6 +37,7 @@ function PostComponent() {
     if (isSuccess) {
       toast.success(`Video page info fetched in ${metric} millisec.`);
       viewsHandler(video!.id);
+      if (likedVideos.includes(video!.id)) setIsLiked(true);
     }
   }, [isSuccess]);
 
@@ -75,8 +77,6 @@ function PostComponent() {
       });
     }
 
-    const isLiked = likedVideos.includes(video!.id);
-
     if (!isLiked) {
       like.mutateAsync('like');
       addLikedVideo(video!.id);
@@ -87,6 +87,8 @@ function PostComponent() {
     removeLikedVideo(video!.id);
     return;
   };
+
+  console.log(video);
 
   return (
     <>
@@ -116,12 +118,12 @@ function PostComponent() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <img
-                      src={video!.author!.picture as string}
+                      src={video!.author.picture as string}
                       className="rounded-full size-10"
-                      alt={`Аватарка пользователя ${video!.author!.username}`}
+                      alt={`Аватарка пользователя ${video!.author.username}`}
                     />
                     <div>
-                      <h5 className="font-medium">{video!.author!.username}</h5>
+                      <h5 className="font-medium">{video!.author.username}</h5>
                     </div>
                   </div>
                   <div>
