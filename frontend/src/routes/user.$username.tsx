@@ -1,21 +1,36 @@
 import Header from '@/components/containers/Header';
 import VideoCard from '@/components/shared/VideoCard';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { setTitle } from '@/hooks/useTitle';
 import { userQueryOpts } from '@/lib/auth';
 import { api } from '@/lib/rpc';
 import { useQuery } from '@tanstack/react-query';
 import { Navigate, createFileRoute } from '@tanstack/react-router';
-import { Menu, UserCheck, UserPlus } from 'lucide-react';
+import { LucideArrowDown, Menu, UserCheck, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export const Route = createFileRoute('/user/$username')({
   component: UserProfilePage,
 });
 
+const panels = {
+  'my-videos': 'Видео',
+  'liked-videos': 'Понравившиеся видео',
+  'my-playlists': 'Плейлисты',
+};
+
+type Panels = keyof typeof panels;
+
 function UserProfilePage() {
   const { username: usernameParam } = Route.useParams();
   const { data: activeUser } = useQuery(userQueryOpts); // the one who watches the page
+  const [currentPanel, setCurrentPanel] = useState<Panels>('my-videos');
 
   const [isSubscribed, setIsSubcribed] = useState(false);
 
@@ -40,9 +55,6 @@ function UserProfilePage() {
     if (!isSuccess) {
       setTitle('Загрузка...');
     } else {
-      // check if current user.id is in data.subscribers
-      // if no user - setIsSubscribed(false)
-
       if (!activeUser) {
         setIsSubcribed(false);
       } else {
@@ -91,11 +103,14 @@ function UserProfilePage() {
               </div>
               <div className="flex gap-4">
                 {isSubscribed ? (
-                  <Button variant="outline">
+                  <Button
+                    disabled={activeUser?.id === user?.id}
+                    variant="outline"
+                  >
                     <UserCheck className="size-4 mr-2" /> Вы подписаны!
                   </Button>
                 ) : (
-                  <Button>
+                  <Button disabled={activeUser?.id === user?.id}>
                     <UserPlus className="size-4 mr-2" /> Подписаться
                   </Button>
                 )}
@@ -103,6 +118,36 @@ function UserProfilePage() {
                   <Menu className="size-4" />
                 </Button>
               </div>
+            </div>
+            <div className="py-4 border-b">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="link" className="w-48">
+                    <LucideArrowDown className="size-4 mr-2" />
+                    {panels[currentPanel]}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56">
+                  <DropdownMenuCheckboxItem
+                    checked={currentPanel === 'my-videos'}
+                    onCheckedChange={() => setCurrentPanel('my-videos')}
+                  >
+                    Мои видео
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={currentPanel === 'liked-videos'}
+                    onCheckedChange={() => setCurrentPanel('liked-videos')}
+                  >
+                    Понравившиеся видео
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={currentPanel === 'my-playlists'}
+                    onCheckedChange={() => setCurrentPanel('my-playlists')}
+                  >
+                    Мои плейлисты
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <div className="grid grid-cols-4 gap-4 py-4">
               {/* Videos */}

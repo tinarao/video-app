@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { User } from '@/types/user';
+import { Link } from '@tanstack/react-router';
 import { Cog } from 'lucide-react';
 
 const FirstInfoBlock = ({ user }: { user: User }) => {
@@ -22,8 +23,10 @@ const FirstInfoBlock = ({ user }: { user: User }) => {
           </div>
         </div>
         <div className="space-x-4 pt-12">
-          <Button variant="outline">
-            <Cog className="size-4 mr-2" /> Редактировать
+          <Button variant="outline" asChild>
+            <Link to="/dashboard/profile">
+              <Cog className="size-4 mr-2" /> Редактировать
+            </Link>
           </Button>
         </div>
       </div>

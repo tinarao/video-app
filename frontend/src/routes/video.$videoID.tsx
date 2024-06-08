@@ -4,12 +4,13 @@ import VideoPlayer from '@/components/shared/VideoPlayer';
 import { Button } from '@/components/ui/button';
 import { useLikes } from '@/hooks/useLikes';
 import { useModals } from '@/hooks/useModal';
+import { setTitle } from '@/hooks/useTitle';
 import { userQueryOpts } from '@/lib/auth';
 import { api } from '@/lib/rpc';
 import { cn, viewsHandler } from '@/lib/utils';
 import { queryClient } from '@/main';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Navigate, createFileRoute } from '@tanstack/react-router';
+import { Link, Navigate, createFileRoute } from '@tanstack/react-router';
 import { Eye, Heart, ListPlusIcon, LoaderCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -20,7 +21,6 @@ export const Route = createFileRoute('/video/$videoID')({
 
 function PostComponent() {
   const { data: user } = useQuery(userQueryOpts);
-  const [metric, setMetric] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const { videoID } = Route.useParams();
   const { likedVideos, addLikedVideo, removeLikedVideo } = useLikes();
@@ -39,19 +39,16 @@ function PostComponent() {
 
   useEffect(() => {
     if (isSuccess) {
-      toast.success(`Video page info fetched in ${metric} millisec.`);
       viewsHandler(video!.id);
       if (likedVideos.includes(video!.id)) setIsLiked(true);
+      setTitle(video!.title);
     }
-  }, [isSuccess]);
+  }, [isSuccess, video, likedVideos]);
 
   const getVideo = async (videoID: string) => {
-    const time = performance.now();
     const res = await api.videos[':url'].$get({ param: { url: videoID } });
 
     const data = await res.json();
-    const result = (performance.now() - time).toFixed(2);
-    setMetric(parseInt(result));
     return data.foundVid;
   };
 
@@ -61,9 +58,11 @@ function PostComponent() {
       await queryClient.invalidateQueries({ queryKey: ['video_page'] });
     },
     mutationFn: async (action: string) => {
-      await api.videos.like[':id{[0-9]+}'][':isLiking'].$patch({
+      const res = await api.videos.like[':id{[0-9]+}'][':isLiking'].$patch({
         param: { id: String(video!.id), isLiking: action },
       });
+
+      console.log(await res.json());
     },
   });
 
@@ -81,11 +80,13 @@ function PostComponent() {
 
     if (!isLiked) {
       like.mutateAsync('like');
+      setIsLiked(true);
       addLikedVideo(video!.id);
       return;
     }
 
     like.mutateAsync('dislike');
+    setIsLiked(false);
     removeLikedVideo(video!.id);
     return;
   };
@@ -115,18 +116,21 @@ function PostComponent() {
                     <Eye className="size-4 mr-2" /> {video!.views}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <img
-                      src={video!.author.picture as string}
-                      className="rounded-full size-10"
-                      alt={`Аватарка пользователя ${video!.author.username}`}
-                    />
-                    <div>
-                      <h5 className="font-medium">{video!.author.username}</h5>
-                    </div>
+                <Link
+                  to={`/user/${video!.author.username}`}
+                  className="inline-flex items-center gap-4 group"
+                >
+                  <img
+                    src={video!.author.picture as string}
+                    className="rounded-full size-10 group-hover:shadow-md transition"
+                    alt={`Аватарка пользователя ${video!.author.username}`}
+                  />
+                  <div>
+                    <h5 className="font-medium group-hover:underline">
+                      {video!.author.username}
+                    </h5>
                   </div>
-                </div>
+                </Link>
                 <div className="flex justify-between py-4">
                   <AddToPlaylistModal
                     isOpen={isAddToPlaylistModalShown}
