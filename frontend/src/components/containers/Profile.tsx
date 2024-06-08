@@ -14,6 +14,7 @@ import UserPlaylists from '../pages/profile/UserPlaylists';
 import { PlusSquare } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import CreatePlaylistModal from '../modals/CreatePlaylistModal';
+import { useModals } from '@/hooks/useModal';
 
 const panels = {
   'my-videos': 'Мои видео',
@@ -24,6 +25,7 @@ const panels = {
 const Profile = ({ user }: { user: User }) => {
   type Panels = keyof typeof panels;
   const [currentPanel, setCurrentPanel] = useState<Panels>('my-videos');
+  const { isCreatePlaylistModalShown, toggleCreatePlaylistModal } = useModals();
 
   return (
     <>
@@ -57,8 +59,12 @@ const Profile = ({ user }: { user: User }) => {
           </DropdownMenuContent>
         </DropdownMenu>
         {currentPanel === 'my-playlists' && (
-          <CreatePlaylistModal user={user}>
-            <Button variant="ghost" size="sm">
+          <CreatePlaylistModal isShown={isCreatePlaylistModalShown}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleCreatePlaylistModal(true)}
+            >
               <PlusSquare className="size-4 mr-2" />
               Создать плейлист
             </Button>

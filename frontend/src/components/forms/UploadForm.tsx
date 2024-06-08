@@ -81,9 +81,9 @@ export const UploadForm = () => {
                 tags: tagsArr,
                 category: category,
               };
-              const res = await api.videos.$post({ json: payload });
-              const saved = await res.json();
-              console.log(saved);
+              await api.videos.$post({ json: payload });
+              toast.success('Видео успешно добавлено!');
+              return;
             } catch (error) {
               console.error(error);
               toast.error('Ошибка при сохранении видео');
@@ -96,9 +96,6 @@ export const UploadForm = () => {
       );
     },
   });
-
-  // debug
-  console.log('Category', category);
 
   return (
     <div>

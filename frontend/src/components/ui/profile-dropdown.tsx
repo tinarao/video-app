@@ -16,11 +16,10 @@ const ProfileDropdown = ({ user }: { user: User }) => {
   const handleLogout = async () => {
     const res = await api.auth.logout.$get();
     if (!res.ok) {
-      const json = await res.json();
-      console.log(json);
       toast.error('Произошла ошибка при выходе из аккаунта');
       return;
     }
+
     toast.success('Успешно!');
     window.location.reload();
   };
@@ -49,7 +48,10 @@ const ProfileDropdown = ({ user }: { user: User }) => {
           <Link to="/upload">Загрузить видео</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
+        <DropdownMenuItem
+          className="cursor-pointer"
+          onClick={() => handleLogout}
+        >
           Выйти
         </DropdownMenuItem>
       </DropdownMenuContent>

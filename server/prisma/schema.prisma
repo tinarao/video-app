@@ -16,12 +16,15 @@ model User {
   family_name String?
   given_name  String?
   bio         String?
-  username    String
+  username    String   @unique
   password    String
   picture     String   @default("https://amu.edu.kz/upload/default-avatar.jpg")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   isVerified  Boolean  @default(false)
+
+  subscribers  User[] @relation("subscribers")
+  subscribedTo User[] @relation("subscribers")
 
   likedVideos Video[]    @relation("likes")
   videos      Video[]    @relation("videos")

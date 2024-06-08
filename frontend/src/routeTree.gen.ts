@@ -15,6 +15,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as VideoVideoIDImport } from './routes/video.$videoID'
+import { Route as UserUsernameImport } from './routes/user.$username'
 import { Route as AuthenticatedProfilePlaylistPlaylistIDImport } from './routes/_authenticated/profile/playlist.$playlistID'
 
 // Create Virtual Routes
@@ -69,6 +70,11 @@ const AuthenticatedUploadLazyRoute = AuthenticatedUploadLazyImport.update({
 
 const VideoVideoIDRoute = VideoVideoIDImport.update({
   path: '/video/$videoID',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const UserUsernameRoute = UserUsernameImport.update({
+  path: '/user/$username',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -134,6 +140,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterLazyImport
       parentRoute: typeof rootRoute
     }
+    '/user/$username': {
+      preLoaderRoute: typeof UserUsernameImport
+      parentRoute: typeof rootRoute
+    }
     '/video/$videoID': {
       preLoaderRoute: typeof VideoVideoIDImport
       parentRoute: typeof rootRoute
@@ -179,6 +189,7 @@ export const routeTree = rootRoute.addChildren([
   ]),
   LoginLazyRoute,
   RegisterLazyRoute,
+  UserUsernameRoute,
   VideoVideoIDRoute,
 ])
 

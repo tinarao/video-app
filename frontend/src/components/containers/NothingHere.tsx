@@ -4,10 +4,10 @@ const NothingHere = () => {
   return (
     <div className="col-span-4 text-muted-foreground">
       <TvIcon size={48} className="w-fit mx-auto" />
-      <h1 className="text-6xl text-center">
+      <h3 className="text-4xl text-center">
         Здесь пусто! Загрузите своё первое видео или подпишитесь на интересующие
         каналы.
-      </h1>
+      </h3>
     </div>
   );
 };

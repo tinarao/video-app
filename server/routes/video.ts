@@ -21,6 +21,11 @@ export const videosRoute = new Hono()
         });
         return c.json({ videos })
     })
+    .get("/all", async c => {
+        // Debug-only route. delete
+        const videos = await prisma.video.findMany();
+        return c.json(videos)
+    })
     .get('/:url', async (c) => {
         const url = c.req.param('url');
 

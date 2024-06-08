@@ -14,26 +14,38 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Separator } from '../ui/separator';
 import { api } from '@/lib/rpc';
-import { User } from '@/types/user';
 import { toast } from 'sonner';
+import { useModals } from '@/hooks/useModal';
+import { useNavigate } from '@tanstack/react-router';
 
 interface CreatePlaylistModalTypes {
   children: JSX.Element;
-  user: User;
+  isShown: boolean;
 }
 
-const CreatePlaylistModal = ({ children }: CreatePlaylistModalTypes) => {
+const CreatePlaylistModal = ({
+  children,
+  isShown,
+}: CreatePlaylistModalTypes) => {
   const [title, setTitle] = useState<string>('');
   const [isPublic, setIsPublic] = useState(true);
+  const { toggleCreatePlaylistModal } = useModals();
+  const [isInputError, setIsInputError] = useState(false);
+  const navigate = useNavigate();
 
   const createPlaylistHandler = async () => {
+    if (title.length === 0) {
+      setIsInputError(true);
+      toast.error('Название плейлиста не может быть пустым!');
+      return;
+    }
+
     const playlist = {
       title,
       isPublic,
     };
 
     const res = await api.playlists.$post({ json: playlist });
-    const data = await res.json();
     if (!res.ok) {
       toast.success(
         'Произошла ошибка при создании плейлиста, попробуйте позже.',
@@ -41,11 +53,13 @@ const CreatePlaylistModal = ({ children }: CreatePlaylistModalTypes) => {
       return;
     }
 
-    return data;
+    const data = await res.json();
+
+    return navigate({ to: `/profile/playlist/${data.url}` });
   };
 
   return (
-    <Dialog>
+    <Dialog open={isShown}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="w-[400px]">
         <DialogHeader>
@@ -60,6 +74,9 @@ const CreatePlaylistModal = ({ children }: CreatePlaylistModalTypes) => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Название"
+              className={
+                isInputError ? 'bg-red-200 placeholder:text-black' : ''
+              }
             />
           </div>
           <div className="my-2">
@@ -73,8 +90,20 @@ const CreatePlaylistModal = ({ children }: CreatePlaylistModalTypes) => {
             <Label className="ml-2">Публичный плейлист</Label>
           </div>
         </div>
-        <DialogFooter>
-          <Button onClick={createPlaylistHandler}>Сохранить</Button>
+        <DialogFooter className="flex items-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              toggleCreatePlaylistModal(false);
+              setIsInputError(false);
+            }}
+          >
+            Я передумал(а)
+          </Button>
+          <Button size="sm" onClick={createPlaylistHandler}>
+            Сохранить
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

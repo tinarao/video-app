@@ -4,6 +4,7 @@ import { serveStatic } from 'hono/bun';
 import { videosRoute } from './routes/video';
 import { authRoute } from './routes/auth';
 import { playlistsRoute } from './routes/playlists'
+import { usersRoute } from './routes/users';
 
 const app = new Hono();
 // mw
@@ -14,6 +15,7 @@ app.get('/hc', (c) => c.text('дышим!', 200));
 const apiRoutes = app
     .basePath('/api')
     .route("/auth", authRoute)
+    .route("/users", usersRoute)
     .route('/videos', videosRoute)
     .route('/playlists', playlistsRoute)
 

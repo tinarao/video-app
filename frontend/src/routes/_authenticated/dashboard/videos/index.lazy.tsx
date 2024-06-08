@@ -7,7 +7,6 @@ import { api } from '@/lib/rpc';
 import { useQuery } from '@tanstack/react-query';
 import { createLazyFileRoute } from '@tanstack/react-router';
 import { LoaderCircle } from 'lucide-react';
-import { useEffect } from 'react';
 import { toast } from 'sonner';
 
 export const Route = createLazyFileRoute('/_authenticated/dashboard/videos/')({
@@ -30,20 +29,10 @@ function Videos() {
     }
   };
 
-  const {
-    data: videos,
-    isSuccess,
-    isLoading,
-  } = useQuery({
+  const { data: videos, isLoading } = useQuery({
     queryKey: ['videos-by-user'],
     queryFn: getVideos,
   });
-
-  useEffect(() => {
-    if (isSuccess) {
-      console.log(videos);
-    }
-  }, [isSuccess, videos]);
 
   if (!videos || videos.length === 0) {
     return (

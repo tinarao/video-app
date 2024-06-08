@@ -6,7 +6,6 @@ import { decode, sign, verify } from "hono/jwt";
 import { LoginDTO, RegisterDTO } from "../dto/auth.dto";
 
 import * as bcrypt from "bcrypt"
-
 import prisma from "../prisma/db"
 
 export const authRoute = new Hono()

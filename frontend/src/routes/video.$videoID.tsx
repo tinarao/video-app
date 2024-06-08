@@ -1,14 +1,16 @@
 import Header from '@/components/containers/Header';
+import AddToPlaylistModal from '@/components/modals/AddToPlaylistModal';
 import VideoPlayer from '@/components/shared/VideoPlayer';
 import { Button } from '@/components/ui/button';
 import { useLikes } from '@/hooks/useLikes';
+import { useModals } from '@/hooks/useModal';
 import { userQueryOpts } from '@/lib/auth';
 import { api } from '@/lib/rpc';
 import { cn, viewsHandler } from '@/lib/utils';
 import { queryClient } from '@/main';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Navigate, createFileRoute } from '@tanstack/react-router';
-import { Eye, Heart, LoaderCircle } from 'lucide-react';
+import { Eye, Heart, ListPlusIcon, LoaderCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -22,6 +24,8 @@ function PostComponent() {
   const [isLiked, setIsLiked] = useState(false);
   const { videoID } = Route.useParams();
   const { likedVideos, addLikedVideo, removeLikedVideo } = useLikes();
+  const { isAddToPlaylistModalShown, toggleAddToPlaylistModalShown } =
+    useModals();
   const {
     data: video,
     isLoading,
@@ -44,9 +48,7 @@ function PostComponent() {
   const getVideo = async (videoID: string) => {
     const time = performance.now();
     const res = await api.videos[':url'].$get({ param: { url: videoID } });
-    if (!res.ok) {
-      throw new Error('No video');
-    }
+
     const data = await res.json();
     const result = (performance.now() - time).toFixed(2);
     setMetric(parseInt(result));
@@ -88,8 +90,6 @@ function PostComponent() {
     return;
   };
 
-  console.log(video);
-
   return (
     <>
       <Header />
@@ -126,22 +126,46 @@ function PostComponent() {
                       <h5 className="font-medium">{video!.author.username}</h5>
                     </div>
                   </div>
-                  <div>
-                    <Button
-                      variant="ghost"
-                      disabled={like.isPending}
-                      onClick={likeHandler}
-                    >
-                      <Heart
-                        className={cn(
-                          'size-4 mr-2',
-                          likedVideos.includes(video!.id) &&
-                            'shadow-2xl shadow-red-500 text-red-500 fill-red-500',
-                        )}
-                      />
-                      {video!.likes}
-                    </Button>
-                  </div>
+                </div>
+                <div className="flex justify-between py-4">
+                  <AddToPlaylistModal
+                    isOpen={isAddToPlaylistModalShown}
+                    video={video!}
+                    user={user!}
+                  />
+                  <Button
+                    onClick={() => {
+                      if (!user) {
+                        toast.error(
+                          'Авторизуйтесь, чтобы создавать и редактировать плейлисты!',
+                        );
+                        return;
+                      }
+
+                      toggleAddToPlaylistModalShown(true);
+                      return;
+                    }}
+                    size="sm"
+                    variant="outline"
+                  >
+                    <ListPlusIcon className="size-4 mr-2" />
+                    Добавить в плейлист
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    disabled={like.isPending}
+                    onClick={likeHandler}
+                  >
+                    <Heart
+                      className={cn(
+                        'size-4',
+                        likedVideos.includes(video!.id) &&
+                          'shadow-2xl shadow-red-500 text-red-500 fill-red-500',
+                      )}
+                    />
+                  </Button>
                 </div>
               </div>
             </div>
