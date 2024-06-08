@@ -1,5 +1,4 @@
 import { zValidator } from "@hono/zod-validator";
-import { env } from "bun";
 import { Hono } from "hono";
 import { setCookie, getCookie, deleteCookie } from 'hono/cookie';
 import { decode, sign, verify } from "hono/jwt";
@@ -123,5 +122,5 @@ export const authRoute = new Hono()
         deleteCookie(c, "access_token")
         deleteCookie(c, "refresh_token")
 
-        return c.status(200)
+        return c.text("Успешно", 200)
     })

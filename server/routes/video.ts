@@ -192,7 +192,7 @@ export const videosRoute = new Hono()
 
         const userDoc = await prisma.user.findFirst({
             where: { id: parseInt(userID) },
-            include: { likedVideos: true }
+            include: { likedVideos: { where: { isHidden: true } } }
         })
         if (!userDoc) {
             return c.json({}, 404)

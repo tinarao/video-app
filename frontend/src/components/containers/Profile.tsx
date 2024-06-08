@@ -79,9 +79,17 @@ const Profile = ({ user }: { user: User }) => {
           </Button>
         )}
       </div>
-      {currentPanel === 'my-videos' && <UserVideosBlock user={user!} />}
-      {currentPanel === 'liked-videos' && <UserLikedVideos user={user!} />}
-      {currentPanel === 'my-playlists' && <UserPlaylists user={user!} />}
+      <div className="container py-4">
+        {currentPanel === 'my-videos' && (
+          <UserVideosBlock videos={user.videos} />
+        )}
+        {currentPanel === 'liked-videos' && (
+          <UserLikedVideos videos={user.likedVideos} />
+        )}
+        {currentPanel === 'my-playlists' && (
+          <UserPlaylists playlists={user.playlists} />
+        )}
+      </div>
     </>
   );
 };

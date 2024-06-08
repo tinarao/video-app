@@ -3,12 +3,15 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { useEffect, useState } from 'react';
-import { User } from '@/types/user';
 import { Textarea } from '../ui/textarea';
 import { toast } from 'sonner';
+import { User } from '@/types/user';
+import { api } from '@/lib/rpc';
+import { useNavigate } from '@tanstack/react-router';
 
 const EditProfileForm = ({ user }: { user: User }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const navigate = useNavigate();
   const [avatarPreview, setAvatarPreview] = useState<string>(
     user.picture as string,
   );
@@ -49,7 +52,17 @@ const EditProfileForm = ({ user }: { user: User }) => {
       if (isPictureChanged) {
         console.log('Avatar uploading here....');
       }
-      console.log(value);
+      await api.users['update-profile'].$patch({
+        json: {
+          username: value.username,
+          bio: value.bio,
+          given_name: value.given_name,
+          family_name: value.family_name,
+          // picture:
+        },
+      });
+
+      return navigate({ to: '/' });
     },
   });
 

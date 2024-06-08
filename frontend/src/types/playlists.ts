@@ -1,3 +1,5 @@
+import { Video } from "./video";
+
 export interface PlaylistsFrontend {
     id: number;
     title: string;
@@ -7,4 +9,7 @@ export interface PlaylistsFrontend {
     authorID: number;
     createdAt: Date | string;
     updatedAt: Date | string;
+
+    videos: Video[];
+
 }

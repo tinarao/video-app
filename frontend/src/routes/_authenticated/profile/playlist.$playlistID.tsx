@@ -62,11 +62,18 @@ function PlaylistComponent() {
           <div className="grid grid-cols-3 container py-4 h-full">
             <div className="col-span-1 px-2 h-full border-r">
               <div>
-                <img
-                  src="https://www.forexpeacearmy.com/images/placeholder/video.png"
-                  alt="Пустой плейлист"
-                  className="rounded-md"
-                />
+                {playlist!.videos.length === 0 ? (
+                  <img
+                    src="https://www.forexpeacearmy.com/images/placeholder/video.png"
+                    alt="Пустой плейлист"
+                    className="rounded-md"
+                  />
+                ) : (
+                  <video
+                    className="rounded-md"
+                    src={playlist!.videos[0].video}
+                  ></video>
+                )}
                 <h1 className="font-medium text-2xl mt-1 mb-2">
                   {playlist!.title}
                 </h1>

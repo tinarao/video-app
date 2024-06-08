@@ -1,5 +1,7 @@
 import Header from '@/components/containers/Header';
-import VideoCard from '@/components/shared/VideoCard';
+import UserLikedVideos from '@/components/pages/profile/LikedVideos';
+import UserPlaylists from '@/components/pages/profile/UserPlaylists';
+import UserVideosBlock from '@/components/pages/profile/UserVideosBlock';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -35,7 +37,7 @@ function UserProfilePage() {
   const [isSubscribed, setIsSubcribed] = useState(false);
 
   const getUser = async () => {
-    const res = await api.users[':username'].$get({
+    const res = await api.users['by-username'][':username'].$get({
       param: { username: usernameParam },
     });
     return await res.json();
@@ -149,18 +151,15 @@ function UserProfilePage() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            <div className="grid grid-cols-4 gap-4 py-4">
-              {/* Videos */}
-              {user?.videos.length === 0 ? (
-                <>pusto</>
-              ) : (
-                <>
-                  {user!.videos.map((i) => (
-                    <VideoCard vid={i} key={i.id} />
-                  ))}
-                </>
-              )}
-            </div>
+            {currentPanel === 'my-videos' && (
+              <UserVideosBlock videos={user!.videos} />
+            )}
+            {currentPanel === 'liked-videos' && (
+              <UserLikedVideos videos={user!.likedVideos} />
+            )}
+            {currentPanel === 'my-playlists' && (
+              <UserPlaylists playlists={user!.playlists} />
+            )}
           </div>
         )}
       </main>

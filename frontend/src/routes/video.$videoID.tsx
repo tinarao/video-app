@@ -58,11 +58,9 @@ function PostComponent() {
       await queryClient.invalidateQueries({ queryKey: ['video_page'] });
     },
     mutationFn: async (action: string) => {
-      const res = await api.videos.like[':id{[0-9]+}'][':isLiking'].$patch({
+      await api.videos.like[':id{[0-9]+}'][':isLiking'].$patch({
         param: { id: String(video!.id), isLiking: action },
       });
-
-      console.log(await res.json());
     },
   });
 
@@ -156,12 +154,7 @@ function PostComponent() {
                     Добавить в плейлист
                   </Button>
 
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    disabled={like.isPending}
-                    onClick={likeHandler}
-                  >
+                  <Button variant="ghost" size="icon" onClick={likeHandler}>
                     <Heart
                       className={cn(
                         'size-4',
