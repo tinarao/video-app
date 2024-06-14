@@ -1,4 +1,5 @@
-import { Playlist, Video } from "@prisma/client";
+import { PlaylistsFrontend } from "./playlists";
+import { Video } from "./video";
 
 export interface User {
     id: number;
@@ -13,7 +14,7 @@ export interface User {
     updatedAt: Date | string;
     isVerified: boolean;
 
-    videos?: Video[];
-    likedVideos?: Video[];
-    playlists?: Playlist[];
+    videos?: Video[] | null;
+    likedVideos?: Video[] | null;
+    playlists?: PlaylistsFrontend[] | null;
 }

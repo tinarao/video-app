@@ -75,7 +75,8 @@ function UserProfilePage() {
     return <Navigate to="/" />;
   }
 
-  if (isSuccess) {
+  if (isSuccess && process.env.NODE_ENV === 'development') {
+    console.log(process.env.NODE_ENV);
     console.log(user);
   }
 
@@ -151,15 +152,17 @@ function UserProfilePage() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            {currentPanel === 'my-videos' && (
-              <UserVideosBlock videos={user!.videos} />
-            )}
-            {currentPanel === 'liked-videos' && (
-              <UserLikedVideos videos={user!.likedVideos} />
-            )}
-            {currentPanel === 'my-playlists' && (
-              <UserPlaylists playlists={user!.playlists} />
-            )}
+            <div className="py-4">
+              {currentPanel === 'my-videos' && (
+                <UserVideosBlock videos={user!.videos} />
+              )}
+              {currentPanel === 'liked-videos' && (
+                <UserLikedVideos videos={user!.likedVideos} />
+              )}
+              {currentPanel === 'my-playlists' && (
+                <UserPlaylists playlists={user!.playlists} />
+              )}
+            </div>
           </div>
         )}
       </main>

@@ -23,7 +23,10 @@ const UserPlaylists = ({ playlists }: UPProps) => {
                     className="rounded-md group-hover:shadow-xl transition"
                   />
                 ) : (
-                  <video src={i.videos[0].video}></video>
+                  <video
+                    className="rounded-md group-hover:shadow-lg transition"
+                    src={i.videos[0].video}
+                  ></video>
                 )}
                 <h5 className="font-medium mt-1 text-lg line-clamp-1 text-ellipsis">
                   {i.title}

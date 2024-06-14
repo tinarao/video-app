@@ -1,5 +1,5 @@
-import Pusher from 'pusher';
+// import Pusher from 'pusher';
 
-export const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
-    cluster: 'eu'
-});
+// export const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
+//     cluster: 'eu'
+// });

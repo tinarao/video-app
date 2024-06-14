@@ -17,5 +17,6 @@ export const userQueryOpts = queryOptions({
     queryKey: ['user-data'],
     queryFn: getUserData,
     retry: false,
-    staleTime: Infinity
+    staleTime: Infinity,
+    refetchOnWindowFocus: false
 });

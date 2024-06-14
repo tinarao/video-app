@@ -1,14 +1,15 @@
-import { Link, createLazyFileRoute } from '@tanstack/react-router';
-import { ArrowUpRightIcon, LoaderCircle } from 'lucide-react';
-
 import { api } from '@/lib/rpc';
+import { useEffect, useState } from 'react';
+import { setTitle } from '@/hooks/useTitle';
 import { useQuery } from '@tanstack/react-query';
+import { Link, createLazyFileRoute } from '@tanstack/react-router';
+
 import { toast } from 'sonner';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import VideoCard from '@/components/shared/VideoCard';
 import MainLayout from '@/components/layouts/main-layout';
 import NothingHere from '@/components/containers/NothingHere';
+import { ArrowUpRightIcon, LoaderCircle } from 'lucide-react';
 
 export const Route = createLazyFileRoute('/')({
   component: Index,
@@ -35,6 +36,10 @@ function Index() {
   if (isFetched) {
     toast.success(`fetched index videos in ${metric.toFixed(2)} millisec.`);
   }
+
+  useEffect(() => {
+    setTitle('Главная | VidTube');
+  });
 
   return (
     <MainLayout>

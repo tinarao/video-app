@@ -3,7 +3,6 @@ import AddToPlaylistModal from '@/components/modals/AddToPlaylistModal';
 import VideoPlayer from '@/components/shared/VideoPlayer';
 import { Button } from '@/components/ui/button';
 import { useLikes } from '@/hooks/useLikes';
-import { useModals } from '@/hooks/useModal';
 import { setTitle } from '@/hooks/useTitle';
 import { userQueryOpts } from '@/lib/auth';
 import { api } from '@/lib/rpc';
@@ -24,8 +23,6 @@ function PostComponent() {
   const [isLiked, setIsLiked] = useState(false);
   const { videoID } = Route.useParams();
   const { likedVideos, addLikedVideo, removeLikedVideo } = useLikes();
-  const { isAddToPlaylistModalShown, toggleAddToPlaylistModalShown } =
-    useModals();
   const {
     data: video,
     isLoading,
@@ -41,7 +38,7 @@ function PostComponent() {
     if (isSuccess) {
       viewsHandler(video!.id);
       if (likedVideos.includes(video!.id)) setIsLiked(true);
-      setTitle(video!.title);
+      setTitle(`${video!.title} - ${video!.author.username}`);
     }
   }, [isSuccess, video, likedVideos]);
 
@@ -130,29 +127,21 @@ function PostComponent() {
                   </div>
                 </Link>
                 <div className="flex justify-between py-4">
-                  <AddToPlaylistModal
-                    isOpen={isAddToPlaylistModalShown}
-                    video={video!}
-                    user={user!}
-                  />
-                  <Button
-                    onClick={() => {
-                      if (!user) {
-                        toast.error(
-                          'Авторизуйтесь, чтобы создавать и редактировать плейлисты!',
-                        );
-                        return;
-                      }
-
-                      toggleAddToPlaylistModalShown(true);
-                      return;
-                    }}
-                    size="sm"
-                    variant="outline"
-                  >
-                    <ListPlusIcon className="size-4 mr-2" />
-                    Добавить в плейлист
-                  </Button>
+                  {user ? (
+                    <AddToPlaylistModal video={video!} userId={user?.id}>
+                      <Button size="sm" variant="outline">
+                        <ListPlusIcon className="size-4 mr-2" />
+                        Добавить в плейлист
+                      </Button>
+                    </AddToPlaylistModal>
+                  ) : (
+                    <Button size="sm" variant="outline" asChild>
+                      <Link to="/login">
+                        <ListPlusIcon className="size-4 mr-2" />
+                        Добавить в плейлист
+                      </Link>
+                    </Button>
+                  )}
 
                   <Button variant="ghost" size="icon" onClick={likeHandler}>
                     <Heart

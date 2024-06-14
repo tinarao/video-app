@@ -1,29 +1,27 @@
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { useModals } from '@/hooks/useModal';
 import { api } from '@/lib/rpc';
-import { User } from '@/types/user';
 import { Video } from '@/types/video';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Button } from '../ui/button';
-import { Separator } from '../ui/separator';
 import { Loader2, LoaderCircle } from 'lucide-react';
 import { PlaylistsFrontend } from '@/types/playlists';
 import { useState } from 'react';
 
 interface ATPMProps {
   video: Video;
-  user: User;
-  isOpen: boolean;
+  userId?: number;
+  children: JSX.Element;
 }
 
-const AddToPlaylistModal = ({ video, user, isOpen }: ATPMProps) => {
+const AddToPlaylistModal = ({ video, userId, children }: ATPMProps) => {
   const { toggleAddToPlaylistModalShown } = useModals();
   const [isUploadLoading, setIsUploadLoading] = useState(false);
 
@@ -59,12 +57,13 @@ const AddToPlaylistModal = ({ video, user, isOpen }: ATPMProps) => {
   };
 
   const getPlaylists = async () => {
+    if (!userId) return;
+
     const res = await api.playlists[':userID{[0-9]+}'].$get({
-      param: { userID: String(user.id) },
+      param: { userID: String(userId) },
     });
 
     const { playlists } = await res.json();
-
     return playlists;
   };
 
@@ -75,6 +74,7 @@ const AddToPlaylistModal = ({ video, user, isOpen }: ATPMProps) => {
   } = useQuery({
     queryKey: ['playlists-profile-page'],
     queryFn: getPlaylists,
+    retry: false,
   });
 
   if (isError) {
@@ -82,7 +82,8 @@ const AddToPlaylistModal = ({ video, user, isOpen }: ATPMProps) => {
   }
 
   return (
-    <Dialog open={isOpen}>
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="w-[300px]">
         <DialogHeader>
           <DialogTitle>Выберите плейлист...</DialogTitle>
@@ -116,23 +117,6 @@ const AddToPlaylistModal = ({ video, user, isOpen }: ATPMProps) => {
             </>
           )}
         </div>
-        <Separator />
-        <DialogFooter>
-          <div className="flex justify-between w-full">
-            <Button
-              disabled={isUploadLoading}
-              className="w-full"
-              variant="destructive"
-              onClick={() => toggleAddToPlaylistModalShown(false)}
-            >
-              {isUploadLoading ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                'Отмена'
-              )}
-            </Button>
-          </div>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
