@@ -101,12 +101,10 @@ const PlayVideoMainWidget = ({
               <VideoPlayer url={video!.video} />
             </div>
             <div className="py-2">
-              <div>
-                <h1 className="text-xl font-medium line-clamp-1 text-ellipsis">
-                  {video!.title}
-                </h1>
+              <div className="py-2">
+                <h1 className="text-xl font-medium">{video!.title}</h1>
               </div>
-              <div className="border-b flex justify-between">
+              <div className="border-b flex justify-between py-2">
                 <Link
                   to={`/user/${video!.author!.username}`}
                   className="inline-flex items-center gap-4 group"
@@ -123,55 +121,62 @@ const PlayVideoMainWidget = ({
                   </div>
                 </Link>
               </div>
-              <div className="flex justify-between py-4">
-                {user ? (
-                  <AddToPlaylistModal video={video!} userId={user?.id}>
-                    <Button size="sm" variant="outline">
-                      <ListPlusIcon className="size-4 mr-2" />
-                      Добавить в плейлист
-                    </Button>
-                  </AddToPlaylistModal>
-                ) : (
-                  <Button size="sm" variant="outline" asChild>
-                    <Link to="/login">
-                      <ListPlusIcon className="size-4 mr-2" />
-                      Добавить в плейлист
-                    </Link>
-                  </Button>
-                )}
-
-                <Button variant="ghost" size="icon" onClick={likeHandler}>
-                  <Heart
-                    className={cn(
-                      'size-4',
-                      likedVideos.includes(video!.id) &&
-                        'shadow-2xl shadow-red-500 text-red-500 fill-red-500',
+              <div className="p-4">
+                <div className="flex justify-between">
+                  <div className="flex gap-12 items-baseline">
+                    <div className="inline-flex items-center font-medium text-muted-foreground">
+                      <Eye className="size-4 mr-2" />{' '}
+                      <span>{video!.views}</span>
+                    </div>
+                    {video.desc && (
+                      <div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="cursor-pointer"
+                          onClick={() => setIsDescShown((prev) => !prev)}
+                        >
+                          {isDescShown ? (
+                            <BookOpen className="size-4 mr-2" />
+                          ) : (
+                            <BookIcon className="size-4 mr-2" />
+                          )}
+                          Открыть описание
+                        </Button>
+                        <details open={isDescShown}>
+                          <summary className="hidden"></summary>
+                          <p className="whitespace-pre-line">{video!.desc}</p>
+                        </details>
+                      </div>
                     )}
-                  />
-                </Button>
-              </div>
-              <div className="border p-4">
-                <div className="inline-flex items-center font-medium text-muted-foreground">
-                  <Eye className="size-4 mr-2" /> <span>{video!.views}</span>
-                </div>
-                <div className="">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="cursor-pointer"
-                    onClick={() => setIsDescShown((prev) => !prev)}
-                  >
-                    {isDescShown ? (
-                      <BookOpen className="size-4 mr-2" />
+                  </div>
+                  <div className="inline-flex gap-4">
+                    {user ? (
+                      <AddToPlaylistModal video={video!} userId={user?.id}>
+                        <Button size="sm" variant="outline">
+                          <ListPlusIcon className="size-4 mr-2" />
+                          Добавить в плейлист
+                        </Button>
+                      </AddToPlaylistModal>
                     ) : (
-                      <BookIcon className="size-4 mr-2" />
+                      <Button size="sm" variant="outline" asChild>
+                        <Link to="/login">
+                          <ListPlusIcon className="size-4 mr-2" />
+                          Добавить в плейлист
+                        </Link>
+                      </Button>
                     )}
-                    Открыть описание
-                  </Button>
-                  <details open={isDescShown}>
-                    <summary className="hidden"></summary>
-                    <p className="whitespace-pre-line">{video!.desc}</p>
-                  </details>
+
+                    <Button variant="ghost" size="icon" onClick={likeHandler}>
+                      <Heart
+                        className={cn(
+                          'size-4',
+                          likedVideos.includes(video!.id) &&
+                            'shadow-2xl shadow-red-500 text-red-500 fill-red-500',
+                        )}
+                      />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
