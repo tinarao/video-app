@@ -5,7 +5,8 @@ import { Video } from '@/types/video';
 const VideoCard = ({ vid }: { vid: Video }) => {
   return (
     <Link
-      to={`/video/${vid.url}`}
+      to="/video"
+      search={{ nid: vid.url }}
       className="col-span-1 rounded-md group transition"
     >
       <video src={vid.video} className="rounded-t-md" controls={false}></video>

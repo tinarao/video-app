@@ -2,7 +2,14 @@ import { Video } from '@/types/video';
 import VideoPlayer from '@/components/shared/VideoPlayer';
 import { Button } from '@/components/ui/button';
 import AddToPlaylistModal from '@/components/modals/AddToPlaylistModal';
-import { Eye, Heart, ListPlusIcon, LoaderCircle } from 'lucide-react';
+import {
+  BookIcon,
+  BookOpen,
+  Eye,
+  Heart,
+  ListPlusIcon,
+  LoaderCircle,
+} from 'lucide-react';
 import { viewsHandler } from '@/lib/utils';
 import { Link } from '@tanstack/react-router';
 import { User } from '@/types/user';
@@ -32,6 +39,7 @@ const PlayVideoMainWidget = ({
 }: PVMWProps) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isViewCounted, setIsViewCounted] = useState(false);
+  const [isDescShown, setIsDescShown] = useState(false);
   const { likedVideos, addLikedVideo, removeLikedVideo } = useLikes();
 
   const like = useMutation({
@@ -80,8 +88,6 @@ const PlayVideoMainWidget = ({
     }
   }, [isSuccess, video]);
 
-  // console.log({ widget: 'pvmw', video });
-
   return (
     <div className="container-wrapper grid grid-cols-11 gap-2 py-4">
       {isLoading && !isSuccess ? (
@@ -100,26 +106,23 @@ const PlayVideoMainWidget = ({
                   {video!.title}
                 </h1>
               </div>
-              <div className="py-2 border-t">
-                <span className="flex items-center text-muted-foreground">
-                  <Eye className="size-4 mr-2" /> {video!.views}
-                </span>
+              <div className="border-b flex justify-between">
+                <Link
+                  to={`/user/${video!.author!.username}`}
+                  className="inline-flex items-center gap-4 group"
+                >
+                  <img
+                    src={video!.author!.picture as string}
+                    className="rounded-full size-10 group-hover:shadow-md transition"
+                    alt={`Аватарка пользователя ${video!.author!.username}`}
+                  />
+                  <div>
+                    <h5 className="font-medium group-hover:underline">
+                      {video!.author!.username}
+                    </h5>
+                  </div>
+                </Link>
               </div>
-              <Link
-                to={`/user/${video!.author!.username}`}
-                className="inline-flex items-center gap-4 group"
-              >
-                <img
-                  src={video!.author!.picture as string}
-                  className="rounded-full size-10 group-hover:shadow-md transition"
-                  alt={`Аватарка пользователя ${video!.author!.username}`}
-                />
-                <div>
-                  <h5 className="font-medium group-hover:underline">
-                    {video!.author!.username}
-                  </h5>
-                </div>
-              </Link>
               <div className="flex justify-between py-4">
                 {user ? (
                   <AddToPlaylistModal video={video!} userId={user?.id}>
@@ -146,6 +149,30 @@ const PlayVideoMainWidget = ({
                     )}
                   />
                 </Button>
+              </div>
+              <div className="border p-4">
+                <div className="inline-flex items-center font-medium text-muted-foreground">
+                  <Eye className="size-4 mr-2" /> <span>{video!.views}</span>
+                </div>
+                <div className="">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="cursor-pointer"
+                    onClick={() => setIsDescShown((prev) => !prev)}
+                  >
+                    {isDescShown ? (
+                      <BookOpen className="size-4 mr-2" />
+                    ) : (
+                      <BookIcon className="size-4 mr-2" />
+                    )}
+                    Открыть описание
+                  </Button>
+                  <details open={isDescShown}>
+                    <summary className="hidden"></summary>
+                    <p className="whitespace-pre-line">{video!.desc}</p>
+                  </details>
+                </div>
               </div>
             </div>
           </div>

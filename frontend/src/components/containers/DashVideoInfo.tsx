@@ -53,7 +53,8 @@ const DashVideoInfo = ({ video }: { video: Video }) => {
         <video src={video.video} className="h-20 rounded-md"></video>
         <div>
           <Link
-            to={`/video/${video.url}`}
+            to="/video"
+            search={{ nid: video.url }}
             target="_blank"
             className="font-medium text-xl line-clamp-1 text-ellipsis hover:text-neutral-500 transition hover:underline"
           >

@@ -1,3 +1,5 @@
+// This one NEEDS refactoring
+
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 
@@ -36,6 +38,20 @@ export const videosRoute = new Hono()
 
         if (foundVid === null) return c.json({ foundVid }, 404)
         return c.json({ foundVid }, 200);
+    })
+
+    .get("/search/cat", async c => {
+        const category = c.req.queries('category');
+
+        const videos = await prisma.video.findMany({
+            where: { isHidden: false, category: { in: category } },
+            include: { author: { select: { id: true, picture: true, username: true } } }
+        })
+        if (videos.length === 0) {
+            return c.text("Видео не найдены", 404);
+        }
+
+        return c.json(videos)
     })
 
     .get('/by-user/:userID{[0-9]+}', async c => {
@@ -91,6 +107,7 @@ export const videosRoute = new Hono()
         const savedVideo = await prisma.video.create({
             data: {
                 video: data.video,
+                desc: data.desc ?? "",
                 title: data.title,
                 url: data.url,
                 views: 0,

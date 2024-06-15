@@ -13,9 +13,9 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as VideoImport } from './routes/video'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as PlaylistIndexImport } from './routes/playlist/index'
-import { Route as VideoVideoIDImport } from './routes/video.$videoID'
 import { Route as UserUsernameImport } from './routes/user/$username'
 import { Route as AuthenticatedProfilePlaylistPlaylistIDImport } from './routes/_authenticated/profile/playlist.$playlistID'
 
@@ -53,6 +53,11 @@ const LoginLazyRoute = LoginLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
 
+const VideoRoute = VideoImport.update({
+  path: '/video',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const AuthenticatedRoute = AuthenticatedImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRoute,
@@ -79,11 +84,6 @@ const AuthenticatedUploadLazyRoute = AuthenticatedUploadLazyImport.update({
 } as any).lazy(() =>
   import('./routes/_authenticated/upload.lazy').then((d) => d.Route),
 )
-
-const VideoVideoIDRoute = VideoVideoIDImport.update({
-  path: '/video/$videoID',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const UserUsernameRoute = UserUsernameImport.update({
   path: '/user/$username',
@@ -144,6 +144,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedImport
       parentRoute: typeof rootRoute
     }
+    '/video': {
+      preLoaderRoute: typeof VideoImport
+      parentRoute: typeof rootRoute
+    }
     '/login': {
       preLoaderRoute: typeof LoginLazyImport
       parentRoute: typeof rootRoute
@@ -154,10 +158,6 @@ declare module '@tanstack/react-router' {
     }
     '/user/$username': {
       preLoaderRoute: typeof UserUsernameImport
-      parentRoute: typeof rootRoute
-    }
-    '/video/$videoID': {
-      preLoaderRoute: typeof VideoVideoIDImport
       parentRoute: typeof rootRoute
     }
     '/_authenticated/upload': {
@@ -207,10 +207,10 @@ export const routeTree = rootRoute.addChildren([
     AuthenticatedDashboardProfileIndexLazyRoute,
     AuthenticatedDashboardVideosIndexLazyRoute,
   ]),
+  VideoRoute,
   LoginLazyRoute,
   RegisterLazyRoute,
   UserUsernameRoute,
-  VideoVideoIDRoute,
   PlaylistIndexRoute,
   UserIndexLazyRoute,
 ])

@@ -108,7 +108,8 @@ function PlaylistComponent() {
                 <div className="space-y-2">
                   {playlist!.videos.map((i) => (
                     <Link
-                      to={`/video/${i.url}`}
+                      to="/video"
+                      search={{ nid: i.url }}
                       key={i.id}
                       className="flex gap-4 group"
                     >
