@@ -67,12 +67,12 @@ const DashVideoInfo = ({ video }: { video: Video }) => {
         </div>
       </div>
       <div className="flex gap-8">
-        <div className="flex gap-8 text-muted-foreground">
-          <div className="flex items-center">
+        <div className="grid grid-cols-2 w-48 text-muted-foreground">
+          <div className="flex items-center col-span-1">
             <Heart className="size-5 mr-2" />
             <span className="font-medium text-md">{video.likes}</span>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center col-span-1">
             {video.isHidden ? (
               <EyeOff className="size-5 mr-2" />
             ) : (

@@ -106,7 +106,8 @@ const PlayVideoMainWidget = ({
               </div>
               <div className="border-b flex justify-between py-2">
                 <Link
-                  to={`/user/${video!.author!.username}`}
+                  to="/user"
+                  search={{ name: video.author!.username }}
                   className="inline-flex items-center gap-4 group"
                 >
                   <img

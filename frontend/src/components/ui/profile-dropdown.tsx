@@ -21,7 +21,6 @@ const ProfileDropdown = ({ user }: { user: User }) => {
       return;
     }
 
-    localStorage.removeItem('username');
     toast.success('Успешно!');
     window.location.reload();
   };

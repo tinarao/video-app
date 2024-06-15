@@ -30,11 +30,8 @@ function RegisterPage() {
 
       const res = await api.auth.register.$post({ json: value });
       if (!res.ok) {
-        if (res.status === 400) {
-          return toast.error('Неправильный логин и/или пароль!');
-        } else {
-          return toast.error('Произошла ошибка, попробуйте ещё раз');
-        }
+        const text = await res.text();
+        return toast.error(text);
       }
       toast.success('Зарегистрирован, авторизуем...');
 

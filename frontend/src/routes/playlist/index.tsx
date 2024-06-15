@@ -54,9 +54,9 @@ function PlaylistView() {
               <h1>{index}</h1>
               <div className="border-b pb-4 flex justify-center items-center">
                 <Link
-                  to="/user/$username"
+                  to="/user"
+                  search={{ name: playlist.author.username }}
                   className="font-medium text-lg"
-                  params={{ username: playlist.author.username }}
                 >
                   {playlist.title} - плейлист от {playlist.author.username}
                 </Link>

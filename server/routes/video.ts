@@ -19,14 +19,10 @@ export const videosRoute = new Hono()
     .get("/", async c => {
         const videos = await prisma.video.findMany({
             take: 10,
-            where: { isHidden: false }
+            where: { isHidden: false },
+            include: { author: { select: { id: true, username: true } } }
         });
         return c.json({ videos })
-    })
-    .get("/all", async c => {
-        // Debug-only route. delete
-        const videos = await prisma.video.findMany();
-        return c.json(videos)
     })
     .get('/:url', async (c) => {
         const url = c.req.param('url');
@@ -73,24 +69,39 @@ export const videosRoute = new Hono()
             return c.json({ "message": "Invalid action" }, 400);
         }
 
-        const videoDoc = await prisma.video.findFirst({
-            where: { id: videoID }
-        })
-        if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
+        try {
+            const updatedVideoDoc = await prisma.$transaction(
+                async tx => {
+                    const videoDoc = await tx.video.findFirst({
+                        where: { id: videoID }
+                    })
+                    if (!videoDoc) {
+                        throw new Error('not-found')
+                    }
 
-        if (videoDoc.authorID !== user.id) {
-            return c.json({ "message": "Forbidden" }, 403);
+                    if (videoDoc.authorID !== user.id) {
+                        throw new Error('forbidden')
+                    }
+
+                    const isH = action === "show" ? false : true;
+
+                    return await tx.video.update({
+                        where: { id: videoDoc.id },
+                        data: { isHidden: isH }
+                    })
+                }
+            )
+            return c.json({ updatedVideoDoc }, 201);
+        } catch (error) {
+            switch ((error as Error).message) {
+                case "forbidden":
+                    return c.text("Forbidden", 403);
+                case "not-found":
+                    return c.text("Видео не найдено", 404)
+                default:
+                    return c.text("Внутренняя ошибка сервера", 500)
+            }
         }
-
-        const isH = action === "show" ? false : true;
-
-        const updatedVideoDoc = await prisma.video.update({
-            where: { id: videoDoc.id },
-            data: { isHidden: isH }
-        })
-
-        return c.json({ updatedVideoDoc }, 201);
-
     })
 
     .post('/', auth, zValidator('json', addVideoDTO), async (c) => {

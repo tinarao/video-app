@@ -15,16 +15,15 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as VideoImport } from './routes/video'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
+import { Route as IndexImport } from './routes/index'
+import { Route as UserIndexImport } from './routes/user/index'
 import { Route as PlaylistIndexImport } from './routes/playlist/index'
-import { Route as UserUsernameImport } from './routes/user/$username'
 import { Route as AuthenticatedProfilePlaylistPlaylistIDImport } from './routes/_authenticated/profile/playlist.$playlistID'
 
 // Create Virtual Routes
 
 const RegisterLazyImport = createFileRoute('/register')()
 const LoginLazyImport = createFileRoute('/login')()
-const IndexLazyImport = createFileRoute('/')()
-const UserIndexLazyImport = createFileRoute('/user/')()
 const AuthenticatedUploadLazyImport = createFileRoute(
   '/_authenticated/upload',
 )()
@@ -63,15 +62,15 @@ const AuthenticatedRoute = AuthenticatedImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const IndexLazyRoute = IndexLazyImport.update({
+const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+} as any)
 
-const UserIndexLazyRoute = UserIndexLazyImport.update({
+const UserIndexRoute = UserIndexImport.update({
   path: '/user/',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/user/index.lazy').then((d) => d.Route))
+} as any)
 
 const PlaylistIndexRoute = PlaylistIndexImport.update({
   path: '/playlist/',
@@ -84,11 +83,6 @@ const AuthenticatedUploadLazyRoute = AuthenticatedUploadLazyImport.update({
 } as any).lazy(() =>
   import('./routes/_authenticated/upload.lazy').then((d) => d.Route),
 )
-
-const UserUsernameRoute = UserUsernameImport.update({
-  path: '/user/$username',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const AuthenticatedProfileIndexLazyRoute =
   AuthenticatedProfileIndexLazyImport.update({
@@ -137,7 +131,7 @@ const AuthenticatedProfilePlaylistPlaylistIDRoute =
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
     '/': {
-      preLoaderRoute: typeof IndexLazyImport
+      preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
     '/_authenticated': {
@@ -156,10 +150,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegisterLazyImport
       parentRoute: typeof rootRoute
     }
-    '/user/$username': {
-      preLoaderRoute: typeof UserUsernameImport
-      parentRoute: typeof rootRoute
-    }
     '/_authenticated/upload': {
       preLoaderRoute: typeof AuthenticatedUploadLazyImport
       parentRoute: typeof AuthenticatedImport
@@ -169,7 +159,7 @@ declare module '@tanstack/react-router' {
       parentRoute: typeof rootRoute
     }
     '/user/': {
-      preLoaderRoute: typeof UserIndexLazyImport
+      preLoaderRoute: typeof UserIndexImport
       parentRoute: typeof rootRoute
     }
     '/_authenticated/dashboard/': {
@@ -198,7 +188,7 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export const routeTree = rootRoute.addChildren([
-  IndexLazyRoute,
+  IndexRoute,
   AuthenticatedRoute.addChildren([
     AuthenticatedUploadLazyRoute,
     AuthenticatedDashboardIndexLazyRoute,
@@ -210,9 +200,8 @@ export const routeTree = rootRoute.addChildren([
   VideoRoute,
   LoginLazyRoute,
   RegisterLazyRoute,
-  UserUsernameRoute,
   PlaylistIndexRoute,
-  UserIndexLazyRoute,
+  UserIndexRoute,
 ])
 
 /* prettier-ignore-end */

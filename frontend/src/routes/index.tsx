@@ -1,41 +1,30 @@
 import { api } from '@/lib/rpc';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { setTitle } from '@/hooks/useTitle';
 import { useQuery } from '@tanstack/react-query';
-import { Link, createLazyFileRoute } from '@tanstack/react-router';
+import { Link, createFileRoute } from '@tanstack/react-router';
 
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import VideoCard from '@/components/shared/VideoCard';
 import MainLayout from '@/components/layouts/main-layout';
 import NothingHere from '@/components/containers/NothingHere';
 import { ArrowUpRightIcon, LoaderCircle } from 'lucide-react';
 
-export const Route = createLazyFileRoute('/')({
+export const Route = createFileRoute('/')({
   component: Index,
 });
 
 function Index() {
-  const [metric, setMetric] = useState<number>(0);
-
   const getVideos = async () => {
-    const time = performance.now();
-
     const data = await api.videos.$get();
     const { videos } = await data.json();
-
-    setMetric(performance.now() - time);
     return videos;
   };
 
-  const { data, isLoading, isFetched } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['videosIndex'],
     queryFn: getVideos,
   });
-
-  if (isFetched) {
-    toast.success(`fetched index videos in ${metric.toFixed(2)} millisec.`);
-  }
 
   useEffect(() => {
     setTitle('Главная | VidTube');
@@ -49,7 +38,7 @@ function Index() {
             <LoaderCircle color="black" size={50} className="animate-spin" />
           </div>
         ) : (
-          <div className="grid grid-cols-4 gap-8">
+          <div className="grid grid-cols-4 gap-4">
             {(data === undefined || data.length === 0) && (
               <div className="col-span-4 py-48 flex flex-col items-center justify-center gap-8 text-muted-foreground">
                 <NothingHere />
@@ -62,7 +51,9 @@ function Index() {
             )}
             {data !== undefined &&
               data.length !== 0 &&
-              data!.map((i) => <VideoCard vid={i} key={i.id} />)}
+              data!.map((i) => (
+                <VideoCard showAuthor={true} vid={i} key={i.id} />
+              ))}
           </div>
         )}
       </div>

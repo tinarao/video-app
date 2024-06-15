@@ -25,14 +25,20 @@ export const usersRoute = new Hono()
         return c.json(user, 200);
     })
     .patch("/update-profile", auth, zValidator('json', updateProfileDTO), async c => {
-        try {
-            const user = c.var.user;
-            const json = await c.req.json();
-            const newData = updateProfileDTO.parse(json);
+        const user = c.var.user;
+        const json = await c.req.json();
+        const newData = updateProfileDTO.parse(json);
 
-            let updated: User;
-            if (newData.picture) {
-                updated = await prisma.user.update({
+        const updated = await prisma.$transaction(
+            async (tx) => {
+                const usernameDuplicate = await tx.user.findFirst({
+                    where: { username: newData.username }
+                })
+                if ((!!usernameDuplicate) && (usernameDuplicate.id !== user.id)) {
+                    throw new Error("Пользователь с таким username уже существует.")
+                }
+
+                const updated = await tx.user.update({
                     where: { id: user.id },
                     data: {
                         bio: newData.bio,
@@ -42,21 +48,10 @@ export const usersRoute = new Hono()
                         picture: newData.picture
                     }
                 })
-            } else {
-                updated = await prisma.user.update({
-                    where: { id: user.id },
-                    data: {
-                        bio: newData.bio,
-                        username: newData.username,
-                        given_name: newData.given_name,
-                        family_name: newData.family_name
-                    }
-                })
-            }
 
-            return c.json(updated)
-        } catch (error) {
-            console.error(error);
-            return c.text("Ошибка при обновлении информации профиля", 500);
-        }
+                return updated
+            }
+        )
+
+        return c.json(updated)
     })

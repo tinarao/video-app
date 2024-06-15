@@ -53,33 +53,50 @@ export const authRoute = new Hono()
 
     })
     .post("/register", zValidator('json', RegisterDTO), async c => {
+        const { username, password: passwordNotHashed, email } = await c.req.json()
+
         try {
-            const { username, password: passwordNotHashed, email } = await c.req.json()
-            const isUserExist = await prisma.user.findFirst({
-                where: { email: email }
-            })
-            if (!!isUserExist) {
-                return c.json({ "message": "User with such credentials already exist" }, 400)
-            }
+            const created = await prisma.$transaction(
+                async (tx) => {
+                    const isUserExist = await tx.user.findFirst({
+                        where: {
+                            OR: [
+                                { username: username },
+                                { email: email }
+                            ]
+                        }
+                    })
+                    if (isUserExist) {
+                        // return c.json({ "message": "User with such credentials already exist" }, 400)
+                        throw new Error("duplicate")
+                    }
 
-            const salt = await bcrypt.genSalt(10)
-            const password = await bcrypt.hash(passwordNotHashed, salt)
+                    const salt = await bcrypt.genSalt(10)
+                    const password = await bcrypt.hash(passwordNotHashed, salt)
 
-            const createdUser = await prisma.user.create({
-                data: {
-                    username: username,
-                    email: email,
-                    password: password,
+                    const createdUser = await tx.user.create({
+                        data: {
+                            username: username,
+                            email: email,
+                            password: password,
+                        }
+                    })
+
+                    const { password: _, ...created } = createdUser;
+                    return created
                 }
-            })
+            )
 
-            const { password: hp, ...saved } = createdUser;
-
-            return c.json({ ...saved }, 201)
+            return c.json({ ...created }, 201)
         } catch (error) {
-            console.error(error);
-            return c.json({ "message": "An error occured while registering a user" }, 500);
+            switch ((error as Error).message) {
+                case "duplicate":
+                    return c.text("Пользователь с такими данными уже существует", 400);
+                default:
+                    return c.text("Внутренняя ошибка сервера", 500)
+            }
         }
+
     })
     .post("/login", zValidator('json', LoginDTO), async c => {
         try {

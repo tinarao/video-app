@@ -5,5 +5,5 @@ export const updateProfileDTO = z.object({
     family_name: z.string(),
     given_name: z.string(),
     username: z.string(),
-    picture: z.optional(z.string())
+    picture: z.string()
 })

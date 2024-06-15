@@ -9,7 +9,7 @@ export interface User {
     username: string;
     password?: string;
     bio?: string | null;
-    picture: string | null;
+    picture?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
     isVerified?: boolean;

@@ -13,13 +13,27 @@ import { setTitle } from '@/hooks/useTitle';
 import { userQueryOpts } from '@/lib/auth';
 import { api } from '@/lib/rpc';
 import { useQuery } from '@tanstack/react-query';
-import { Navigate, createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { LucideArrowDown, Menu, UserCheck, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export const Route = createFileRoute('/user/$username')({
+import { z } from 'zod';
+
+export const Route = createFileRoute('/user/')({
   component: UsernameRoute,
+  validateSearch: (search) => searchValidator.parse(search),
+  beforeLoad: (opts) => {
+    if (!opts.search.name) {
+      throw redirect({ to: '/' });
+    }
+  },
 });
+
+const searchValidator = z.object({
+  name: z.string().min(4).max(20), // username
+});
+
+type SearchParams = z.infer<typeof searchValidator>;
 
 const panels = {
   'my-videos': 'Видео',
@@ -30,10 +44,10 @@ const panels = {
 type Panels = keyof typeof panels;
 
 function UsernameRoute() {
-  const { username: usernameParam } = Route.useParams();
+  const { name: usernameParam }: SearchParams = Route.useSearch();
   const { data: activeUser } = useQuery(userQueryOpts); // the one who watches the page
   const [currentPanel, setCurrentPanel] = useState<Panels>('my-videos');
-
+  const navigate = useNavigate();
   const [isSubscribed, setIsSubcribed] = useState(false);
 
   const getUser = async () => {
@@ -48,15 +62,14 @@ function UsernameRoute() {
     isError,
     isLoading,
     isSuccess,
+    failureCount,
   } = useQuery({
     queryFn: getUser,
     queryKey: ['get-user-by-username'],
   });
 
   useEffect(() => {
-    if (!isSuccess) {
-      setTitle('Загрузка...');
-    } else {
+    if (isSuccess) {
       if (!activeUser) {
         setIsSubcribed(false);
       } else {
@@ -72,7 +85,7 @@ function UsernameRoute() {
   }, [user, isSuccess, activeUser]);
 
   if (isError) {
-    return <Navigate to="/" />;
+    return navigate({ to: '/' });
   }
 
   if (isSuccess && process.env.NODE_ENV === 'development') {
@@ -84,7 +97,14 @@ function UsernameRoute() {
       <Header />
       <main className="container py-4">
         {isLoading ? (
-          <h1>думаем</h1>
+          <div className="w-full py-32 text-center text-3xl">
+            <h3>
+              {failureCount === 0 && 'Ищем...'}
+              {failureCount === 1 && 'Поиски затянулись...'}
+              {failureCount === 2 && 'Подключили следственный комитет...'}
+              {failureCount === 3 && 'Пользователь не найден 😢'}
+            </h3>
+          </div>
         ) : (
           <div>
             <div className="flex border-b py-2 justify-between items-end">

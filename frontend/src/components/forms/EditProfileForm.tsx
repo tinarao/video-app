@@ -8,6 +8,15 @@ import { toast } from 'sonner';
 import { User } from '@/types/user';
 import { api } from '@/lib/rpc';
 import { useNavigate } from '@tanstack/react-router';
+import { queryClient } from '@/main';
+
+interface ApiPayload {
+  username: string;
+  family_name: string;
+  given_name: string;
+  bio: string;
+  picture: string;
+}
 
 const EditProfileForm = ({ user }: { user: User }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -49,17 +58,30 @@ const EditProfileForm = ({ user }: { user: User }) => {
       bio: user.bio || '',
     },
     onSubmit: async ({ value }) => {
+      const payload: ApiPayload = {
+        ...value,
+        picture: user.picture as string,
+      };
+
       if (isPictureChanged) {
         console.log('Avatar uploading here....');
+        payload.picture = '12345';
       }
-      await api.users['update-profile'].$patch({
-        json: {
-          username: value.username,
-          bio: value.bio,
-          given_name: value.given_name,
-          family_name: value.family_name,
-          // picture:
-        },
+      const res = await api.users['update-profile'].$patch({
+        json: payload,
+      });
+
+      if (!res.ok) {
+        console.log(res);
+        toast.error('Произошла ошибка, попробуйте ещё раз');
+        return;
+      }
+
+      toast.success('Успешно!');
+      queryClient.invalidateQueries({
+        queryKey: ['user-data'],
+        refetchType: 'active',
+        exact: true,
       });
 
       return navigate({ to: '/' });
@@ -94,6 +116,20 @@ const EditProfileForm = ({ user }: { user: User }) => {
         children={(f) => (
           <div>
             <Label>Фамилия</Label>
+            <Input
+              name={f.name}
+              value={f.state.value}
+              onBlur={f.handleBlur}
+              onChange={(e) => f.handleChange(e.target.value)}
+            />
+          </div>
+        )}
+      />
+      <form.Field
+        name="given_name"
+        children={(f) => (
+          <div>
+            <Label>Имя</Label>
             <Input
               name={f.name}
               value={f.state.value}
