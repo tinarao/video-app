@@ -18,7 +18,7 @@ import { LucideArrowDown, Menu, UserCheck, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export const Route = createFileRoute('/user/$username')({
-  component: UserProfilePage,
+  component: UsernameRoute,
 });
 
 const panels = {
@@ -29,7 +29,7 @@ const panels = {
 
 type Panels = keyof typeof panels;
 
-function UserProfilePage() {
+function UsernameRoute() {
   const { username: usernameParam } = Route.useParams();
   const { data: activeUser } = useQuery(userQueryOpts); // the one who watches the page
   const [currentPanel, setCurrentPanel] = useState<Panels>('my-videos');
@@ -76,7 +76,6 @@ function UserProfilePage() {
   }
 
   if (isSuccess && process.env.NODE_ENV === 'development') {
-    console.log(process.env.NODE_ENV);
     console.log(user);
   }
 

@@ -15,7 +15,11 @@ const UserPlaylists = ({ playlists }: UPProps) => {
         <div className="grid grid-cols-4 gap-4">
           {playlists.map((i) => (
             <div key={i.id} className="group">
-              <Link to={`/profile/playlist/${i.url}`} className="col-span-1">
+              <Link
+                to="/playlist"
+                search={{ playlistUrl: i.url, index: 0 }}
+                className="col-span-1"
+              >
                 {i.videos.length === 0 ? (
                   <img
                     src="https://www.forexpeacearmy.com/images/placeholder/video.png"

@@ -1,3 +1,5 @@
+import { User } from "./user";
+
 export interface Video {
     id: number;
     title: string;
@@ -10,6 +12,8 @@ export interface Video {
     updatedAt: Date | string;
     authorID: number;
     isHidden: boolean;
+
+    author?: User
 }
 
 export const categories = [

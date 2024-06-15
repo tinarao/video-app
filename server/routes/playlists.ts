@@ -5,24 +5,42 @@ import { nanoid } from 'nanoid';
 import { addVideoDTO, createPlaylistDTO } from "../dto/playlists.dto";
 
 export const playlistsRoute = new Hono()
-    .get("/:userID{[0-9]+}", auth, async c => {
-        const user = c.var.user;
+    .get("/:userID{[0-9]+}", async c => {
         const userID = c.req.param('userID');
 
         const playlists = await prisma.playlist.findMany({
-            where: { authorID: user.id },
+            where: { authorID: parseInt(userID) },
             include: { videos: true }
         })
         if (playlists.length === 0) {
             return c.json({ playlists }, 404);
         }
 
-        if (user.id !== parseInt(userID)) {
-            const filteredPlaylists = playlists.filter(i => i.isPublic !== true);
-            return c.json({ playlists: filteredPlaylists })
-        }
+        const filteredPlaylists = playlists.filter(i => i.isPublic !== true);
 
-        return c.json({ playlists })
+        return c.json({ playlists: filteredPlaylists })
+    })
+
+    .get("/playlist-id/:playlistUrl", async c => {
+        const playlistId = c.req.param('playlistUrl');
+        const playlist = await prisma.playlist.findFirst({
+            where: { url: playlistId },
+            include: {
+                videos: {
+                    include: {
+                        author: {
+                            select: { username: true, id: true, picture: true }
+                        }
+                    }
+                },
+                author: {
+                    select: { username: true, id: true, picture: true }
+                }
+            }
+        })
+
+        if (!playlist) return c.text('Плейлист не найден', 404)
+        return c.json(playlist)
     })
 
     .get("/my-playlists/:playlistURL", auth, async c => {

@@ -74,4 +74,8 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .container-wrapper {
+    @apply xl:max-w-[1200px] 2xl:max-w-[1700px] mx-auto;
+  }
 }

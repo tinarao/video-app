@@ -14,8 +14,9 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
+import { Route as PlaylistIndexImport } from './routes/playlist/index'
 import { Route as VideoVideoIDImport } from './routes/video.$videoID'
-import { Route as UserUsernameImport } from './routes/user.$username'
+import { Route as UserUsernameImport } from './routes/user/$username'
 import { Route as AuthenticatedProfilePlaylistPlaylistIDImport } from './routes/_authenticated/profile/playlist.$playlistID'
 
 // Create Virtual Routes
@@ -23,6 +24,7 @@ import { Route as AuthenticatedProfilePlaylistPlaylistIDImport } from './routes/
 const RegisterLazyImport = createFileRoute('/register')()
 const LoginLazyImport = createFileRoute('/login')()
 const IndexLazyImport = createFileRoute('/')()
+const UserIndexLazyImport = createFileRoute('/user/')()
 const AuthenticatedUploadLazyImport = createFileRoute(
   '/_authenticated/upload',
 )()
@@ -60,6 +62,16 @@ const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const UserIndexLazyRoute = UserIndexLazyImport.update({
+  path: '/user/',
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import('./routes/user/index.lazy').then((d) => d.Route))
+
+const PlaylistIndexRoute = PlaylistIndexImport.update({
+  path: '/playlist/',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AuthenticatedUploadLazyRoute = AuthenticatedUploadLazyImport.update({
   path: '/upload',
@@ -152,6 +164,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUploadLazyImport
       parentRoute: typeof AuthenticatedImport
     }
+    '/playlist/': {
+      preLoaderRoute: typeof PlaylistIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/user/': {
+      preLoaderRoute: typeof UserIndexLazyImport
+      parentRoute: typeof rootRoute
+    }
     '/_authenticated/dashboard/': {
       preLoaderRoute: typeof AuthenticatedDashboardIndexLazyImport
       parentRoute: typeof AuthenticatedImport
@@ -191,6 +211,8 @@ export const routeTree = rootRoute.addChildren([
   RegisterLazyRoute,
   UserUsernameRoute,
   VideoVideoIDRoute,
+  PlaylistIndexRoute,
+  UserIndexLazyRoute,
 ])
 
 /* prettier-ignore-end */
