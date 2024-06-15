@@ -9,6 +9,14 @@ import { User } from '@/types/user';
 import { api } from '@/lib/rpc';
 import { useNavigate } from '@tanstack/react-router';
 import { queryClient } from '@/main';
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from 'firebase/storage';
+import { app } from '@/firebase';
+import { Progress } from '../ui/progress';
 
 interface ApiPayload {
   username: string;
@@ -20,6 +28,7 @@ interface ApiPayload {
 
 const EditProfileForm = ({ user }: { user: User }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [progress, setProgress] = useState<number>(0);
   const navigate = useNavigate();
   const [avatarPreview, setAvatarPreview] = useState<string>(
     user.picture as string,
@@ -64,9 +73,55 @@ const EditProfileForm = ({ user }: { user: User }) => {
       };
 
       if (isPictureChanged) {
-        console.log('Avatar uploading here....');
-        payload.picture = '12345';
+        // load pic to firebase
+        const now = new Date().getTime();
+        const storage = getStorage(app);
+        const pathToFile = `pictures/avatars/${user.username}-${now}`;
+        const storageRef = ref(storage, pathToFile);
+        const uploadTask = uploadBytesResumable(storageRef, selectedFile!);
+
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setProgress(progress);
+          },
+          (error) => {
+            return error;
+          },
+          async () => {
+            getDownloadURL(uploadTask.snapshot.ref).then(
+              async (downloadURL) => {
+                payload.picture = downloadURL!;
+
+                // rest api code
+                const res = await api.users['update-profile'].$patch({
+                  json: payload,
+                });
+
+                if (!res.ok) {
+                  console.log(res);
+                  toast.error('Произошла ошибка, попробуйте ещё раз');
+                  return;
+                }
+
+                toast.success('Успешно!');
+                queryClient.invalidateQueries({
+                  queryKey: ['user-data'],
+                  refetchType: 'active',
+                  exact: true,
+                });
+
+                return navigate({ to: '/' });
+              },
+            );
+          },
+        );
+
+        return;
       }
+
       const res = await api.users['update-profile'].$patch({
         json: payload,
       });
@@ -164,6 +219,7 @@ const EditProfileForm = ({ user }: { user: User }) => {
           onChange={(e) => onFileSelect(e)}
           accept="image/png, image/jpeg"
         />
+        <Progress className="my-4" value={progress} />
       </div>
       <Button>Сохранить</Button>
     </form>

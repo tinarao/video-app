@@ -30,8 +30,8 @@ const ProfileDropdown = ({ user }: { user: User }) => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="lg">
           <img
-            src={user.picture || 'https://amu.edu.kz/upload/default-avatar.jpg'}
-            className="size-8 mr-2 rounded-full"
+            src={user.picture as string}
+            className="size-8 mr-2 rounded-full object-cover aspect-square"
           />
           {user.username}
         </Button>

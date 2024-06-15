@@ -18,6 +18,7 @@ import { LucideArrowDown, Menu, UserCheck, UserPlus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { z } from 'zod';
+import UserInfoModal from '../../components/modals/UserInfoModal';
 
 export const Route = createFileRoute('/user/')({
   component: UsernameRoute,
@@ -115,15 +116,17 @@ function UsernameRoute() {
                   src={user!.picture}
                   alt={`Аватарка ${user!.username}`}
                 />
-                <div>
-                  <h1 className="text-4xl ml-2">{user!.username}</h1>
-                  <p>{user!.bio}</p>
-                  <span>
-                    {user!.family_name} {user!.given_name}
-                  </span>
+                <div className="pl-2">
+                  <h1 className="text-4xl">{user!.username}</h1>
+                  <h3>
+                    {user!.given_name} {user!.family_name}
+                  </h3>
                 </div>
               </div>
               <div className="flex gap-4">
+                <UserInfoModal user={user!}>
+                  <Button variant="outline">Подробнее о пользователе</Button>
+                </UserInfoModal>
                 {isSubscribed ? (
                   <Button
                     disabled={activeUser?.id === user?.id}
