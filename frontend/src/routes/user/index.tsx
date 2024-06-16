@@ -14,12 +14,13 @@ import { userQueryOpts } from '@/lib/auth';
 import { api } from '@/lib/rpc';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { LucideArrowDown, Menu, UserCheck, UserPlus } from 'lucide-react';
+import { LucideArrowDown, Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { z } from 'zod';
 import UserInfoModal from '../../components/modals/UserInfoModal';
 import { PlaylistsFrontend } from '@/types/playlists';
+import SubscribeButton from '@/components/shared/SubscribeButton';
 
 export const Route = createFileRoute('/user/')({
   component: UsernameRoute,
@@ -53,7 +54,6 @@ function UsernameRoute() {
     PlaylistsFrontend[] | undefined
   >(undefined);
   const navigate = useNavigate();
-  const [isSubscribed, setIsSubcribed] = useState(false);
 
   const getUser = async () => {
     const res = await api.users['by-username'][':username'].$get({
@@ -75,16 +75,6 @@ function UsernameRoute() {
 
   useEffect(() => {
     if (isSuccess) {
-      if (!activeUser) {
-        setIsSubcribed(false);
-      } else {
-        user.subscribers.forEach((i) => {
-          if (i.id === activeUser.id) {
-            setIsSubcribed(true);
-          }
-        });
-      }
-
       setTitle(user?.username);
     }
   }, [isSuccess, activeUser, user?.subscribers, user?.username]);
@@ -131,52 +121,47 @@ function UsernameRoute() {
                 <UserInfoModal user={user!}>
                   <Button variant="outline">Подробнее о пользователе</Button>
                 </UserInfoModal>
-                {isSubscribed ? (
-                  <Button
-                    disabled={activeUser?.id === user?.id}
-                    variant="outline"
-                  >
-                    <UserCheck className="size-4 mr-2" /> Вы подписаны!
-                  </Button>
-                ) : (
-                  <Button disabled={activeUser?.id === user?.id}>
-                    <UserPlus className="size-4 mr-2" /> Подписаться
-                  </Button>
-                )}
+                <SubscribeButton currentUser={activeUser} targetUser={user!} />
                 <Button variant="outline" size="icon">
                   <Menu className="size-4" />
                 </Button>
               </div>
             </div>
-            <div className="py-4 border-b">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="link" className="w-48">
-                    <LucideArrowDown className="size-4 mr-2" />
-                    {panels[currentPanel]}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
-                  <DropdownMenuCheckboxItem
-                    checked={currentPanel === 'my-videos'}
-                    onCheckedChange={() => setCurrentPanel('my-videos')}
-                  >
-                    Мои видео
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={currentPanel === 'liked-videos'}
-                    onCheckedChange={() => setCurrentPanel('liked-videos')}
-                  >
-                    Понравившиеся видео
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={currentPanel === 'my-playlists'}
-                    onCheckedChange={() => setCurrentPanel('my-playlists')}
-                  >
-                    Мои плейлисты
-                  </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="py-4 border-b flex justify-between items-center">
+              <div>
+                <span className="font-medium">{user!.subscribers.length}</span>
+                <span> подписчиков</span>
+              </div>
+              <div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="link" className="w-48">
+                      <LucideArrowDown className="size-4 mr-2" />
+                      {panels[currentPanel]}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuCheckboxItem
+                      checked={currentPanel === 'my-videos'}
+                      onCheckedChange={() => setCurrentPanel('my-videos')}
+                    >
+                      Мои видео
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={currentPanel === 'liked-videos'}
+                      onCheckedChange={() => setCurrentPanel('liked-videos')}
+                    >
+                      Понравившиеся видео
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={currentPanel === 'my-playlists'}
+                      onCheckedChange={() => setCurrentPanel('my-playlists')}
+                    >
+                      Мои плейлисты
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
             <div className="py-4">
               {currentPanel === 'my-videos' && (
