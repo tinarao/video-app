@@ -11,17 +11,19 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
-  email       String   @unique
-  family_name String?
-  given_name  String?
-  bio         String?
-  username    String   @unique
-  password    String
-  picture     String   @default("https://amu.edu.kz/upload/default-avatar.jpg")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  isVerified  Boolean  @default(false)
+  id                       Int      @id @default(autoincrement())
+  email                    String   @unique
+  family_name              String?
+  given_name               String?
+  bio                      String?
+  username                 String   @unique
+  password                 String
+  picture                  String   @default("https://firebasestorage.googleapis.com/v0/b/video-hosting-8c6bf.appspot.com/o/avatar-placeholder.jpg?alt=media&token=0ace4a0f-92a8-4f87-9699-d1fb6bc619d5")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  isVerified               Boolean  @default(false)
+  uploadedVideosCount      Int      @default(0)
+  uploadedVideosViewsCount Int      @default(0)
 
   subscribers  User[] @relation("subscribers")
   subscribedTo User[] @relation("subscribers")
@@ -29,6 +31,7 @@ model User {
   likedVideos Video[]    @relation("likes")
   videos      Video[]    @relation("videos")
   playlists   Playlist[]
+  comments    Comment[]  @relation("commentAuthor")
 }
 
 model Playlist {
@@ -39,7 +42,7 @@ model Playlist {
   videos   Video[] @relation("playlists")
   url      String  @unique
 
-  author   User @relation(fields: [authorID], references: [id])
+  author   User @relation(fields: [authorID], references: [id], onDelete: Cascade)
   authorID Int
 
   createdAt DateTime @default(now())
@@ -62,7 +65,18 @@ model Video {
 
   likedBy   User[]     @relation("likes")
   playlists Playlist[] @relation("playlists")
+  comments  Comment[]  @relation("comments")
 
   authorID Int
-  author   User @relation("videos", fields: [authorID], references: [id])
+  author   User @relation("videos", fields: [authorID], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  authorID  Int
+  author    User     @relation("commentAuthor", fields: [authorID], references: [id], onDelete: Cascade)
+  videoID   Int
+  video     Video    @relation("comments", fields: [videoID], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

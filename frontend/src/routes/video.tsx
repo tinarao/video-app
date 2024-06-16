@@ -71,7 +71,6 @@ function PostComponent() {
   useEffect(() => {
     if (isSuccessV) {
       setTitle(`${video!.title} - ${video!.author.username}`);
-      console.log(recoms);
     }
   }, [isSuccessV, video, recoms]);
 

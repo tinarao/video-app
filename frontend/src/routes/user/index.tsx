@@ -19,6 +19,7 @@ import { useEffect, useState } from 'react';
 
 import { z } from 'zod';
 import UserInfoModal from '../../components/modals/UserInfoModal';
+import { PlaylistsFrontend } from '@/types/playlists';
 
 export const Route = createFileRoute('/user/')({
   component: UsernameRoute,
@@ -48,6 +49,9 @@ function UsernameRoute() {
   const { name: usernameParam }: SearchParams = Route.useSearch();
   const { data: activeUser } = useQuery(userQueryOpts); // the one who watches the page
   const [currentPanel, setCurrentPanel] = useState<Panels>('my-videos');
+  const [nonEmptyPlaylists, setNonEmptyPlaylists] = useState<
+    PlaylistsFrontend[] | undefined
+  >(undefined);
   const navigate = useNavigate();
   const [isSubscribed, setIsSubcribed] = useState(false);
 
@@ -83,14 +87,17 @@ function UsernameRoute() {
 
       setTitle(user?.username);
     }
-  }, [user, isSuccess, activeUser]);
+  }, [isSuccess, activeUser, user?.subscribers, user?.username]);
+
+  useEffect(() => {
+    if (isSuccess) {
+      const nonEmptyPl = user.playlists.filter((p) => p.videos.length !== 0);
+      setNonEmptyPlaylists(nonEmptyPl);
+    }
+  }, [isSuccess, user?.playlists]);
 
   if (isError) {
     return navigate({ to: '/' });
-  }
-
-  if (isSuccess && process.env.NODE_ENV === 'development') {
-    console.log(user);
   }
 
   return (
@@ -110,17 +117,14 @@ function UsernameRoute() {
           <div>
             <div className="flex border-b py-2 justify-between items-end">
               {/* Info panel */}
-              <div className="flex">
+              <div className="flex items-center">
                 <img
                   className="size-20 rounded-full"
                   src={user!.picture}
                   alt={`Аватарка ${user!.username}`}
                 />
-                <div className="pl-2">
-                  <h1 className="text-4xl">{user!.username}</h1>
-                  <h3>
-                    {user!.given_name} {user!.family_name}
-                  </h3>
+                <div className="pl-4">
+                  <h1 className="text-5xl">{user!.username}</h1>
                 </div>
               </div>
               <div className="flex gap-4">
@@ -182,7 +186,7 @@ function UsernameRoute() {
                 <UserLikedVideos videos={user!.likedVideos} />
               )}
               {currentPanel === 'my-playlists' && (
-                <UserPlaylists playlists={user!.playlists} />
+                <UserPlaylists playlists={nonEmptyPlaylists} />
               )}
             </div>
           </div>

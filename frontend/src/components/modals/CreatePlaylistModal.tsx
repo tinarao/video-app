@@ -4,10 +4,7 @@ import { Checkbox } from '../ui/checkbox';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from '../ui/dialog';
 import { Input } from '../ui/input';
@@ -15,21 +12,15 @@ import { Label } from '../ui/label';
 import { Separator } from '../ui/separator';
 import { api } from '@/lib/rpc';
 import { toast } from 'sonner';
-import { useModals } from '@/hooks/useModal';
 import { useNavigate } from '@tanstack/react-router';
 
 interface CreatePlaylistModalTypes {
   children: JSX.Element;
-  isShown: boolean;
 }
 
-const CreatePlaylistModal = ({
-  children,
-  isShown,
-}: CreatePlaylistModalTypes) => {
+const CreatePlaylistModal = ({ children }: CreatePlaylistModalTypes) => {
   const [title, setTitle] = useState<string>('');
   const [isPublic, setIsPublic] = useState(true);
-  const { toggleCreatePlaylistModal } = useModals();
   const [isInputError, setIsInputError] = useState(false);
   const navigate = useNavigate();
 
@@ -59,15 +50,12 @@ const CreatePlaylistModal = ({
   };
 
   return (
-    <Dialog open={isShown}>
+    <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="w-[400px]">
-        <DialogHeader>
+        {/* <DialogHeader>
           <DialogTitle>Создать плейлист</DialogTitle>
-          <DialogDescription>
-            Никита электроник 228 ГООООООООЛ влад а4 смартфон vivo
-          </DialogDescription>
-        </DialogHeader>
+        </DialogHeader> */}
         <div className="py-4 w-full">
           <div className="space-y-1">
             <Input
@@ -91,16 +79,6 @@ const CreatePlaylistModal = ({
           </div>
         </div>
         <DialogFooter className="flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              toggleCreatePlaylistModal(false);
-              setIsInputError(false);
-            }}
-          >
-            Я передумал(а)
-          </Button>
           <Button size="sm" onClick={createPlaylistHandler}>
             Сохранить
           </Button>

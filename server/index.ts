@@ -1,6 +1,6 @@
 import app from './app';
 
-const main = async () => {
+const main = () => {
   const port = process.env.PORT || 3000;
 
   Bun.serve({

@@ -1,7 +1,7 @@
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { User } from '@/types/user';
+import { Clock, Eye, User2, Video } from 'lucide-react';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '../ui/separator';
-import { Clock } from 'lucide-react';
 
 interface UIMProps {
   children: JSX.Element;
@@ -13,33 +13,50 @@ const UserInfoModal = ({ children, user }: UIMProps) => {
   return (
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent>
-        <div className="w-full py-24">
-          <img
-            src={user.picture as string}
-            className="size-60 mx-auto rounded-full"
-            alt={`Аватар пользователя ${user.username}`}
-          />
-          <div className="py-2">
-            <h5 className="text-2xl font-medium text-center">
-              {user.username}
-            </h5>
-            <p className="text-center">{user.bio}</p>
+      <DialogContent className="py-8">
+        <img
+          src={user.picture as string}
+          className="size-60 mx-auto rounded-full"
+          alt={`Аватар пользователя ${user.username}`}
+        />
+        <div className="py-2">
+          <h5 className="text-2xl font-medium text-center pb-4">
+            {user.username}
+          </h5>
+
+          <div>
+            <p className="whitespace-pre-line">{user.bio}</p>
             <div className="py-2">
               <Separator />
             </div>
-            <div className="grid grid-cols-2 w-[50%] mx-auto">
-              <div className="col-span-1 bg-rose-100">
-                <span className="flex items-center">
-                  <Clock className="size-4 mr-2" />
-                  {registeredAt}
-                </span>
+          </div>
+
+          <div className="grid grid-cols-2 w-[60%] mx-auto">
+            <div className="col-span-1 flex flex-col">
+              <div className="flex items-center">
+                <Clock className="size-4 mr-2" />
+                {registeredAt}
               </div>
-              <div className="col-span-1 bg-yellow-100">
-                {/* TODO: Расширить модалку с информацией */}
-                <span>Количество залитых видео</span>
-                <span>Общее количество лайков</span>
-                <span>Общее количество просмотров</span>
+              <div className="flex items-center">
+                <User2 className="size-4 mr-2" />
+                {!(user.given_name || user.family_name) ? (
+                  'Имя скрыто'
+                ) : (
+                  <>
+                    {user.given_name || null}
+                    {user.family_name || null}
+                  </>
+                )}
+              </div>
+            </div>
+            <div className="col-span-1">
+              <div className="flex items-center">
+                <Video className="size-4 mr-2" />
+                <span>{user.uploadedVideosCount} видео</span>
+              </div>
+              <div className="flex items-center">
+                <Eye className="size-4 mr-2" />
+                <span>{user.uploadedVideosViewsCount} просмотров</span>
               </div>
             </div>
           </div>

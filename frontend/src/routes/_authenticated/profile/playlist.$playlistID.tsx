@@ -42,8 +42,6 @@ function PlaylistComponent() {
       const timestamp = new Date(playlist?.createdAt).toLocaleDateString();
       setCreatedAt(timestamp);
     }
-
-    console.log(playlist);
   }, [isSuccess, playlist]);
 
   if (isError) {

@@ -61,24 +61,30 @@ function PlaylistView() {
                   {playlist.title} - плейлист от {playlist.author.username}
                 </Link>
               </div>
-              {playlist.videos.map((video, index) => (
-                <Link
-                  to="/playlist"
-                  search={{ playlistUrl: playlistUrl, index: index }}
-                  key={video.id}
-                  className="flex gap-2 px-2"
-                >
-                  <video
-                    src={video.video}
-                    className="w-36 min-w-36 rounded-md line-clamp-2 text-ellipsis"
-                  ></video>
-                  <h5>{index}</h5>
-                  <div className="flex flex-col justify-between">
-                    <h5 className="font-medium text-lg">{video.title}</h5>
-                    <h5>{video.author.username}</h5>
-                  </div>
-                </Link>
-              ))}
+              {playlist.videos.length === 0 ? (
+                <>Пусто</>
+              ) : (
+                <>
+                  {playlist.videos.map((video, index) => (
+                    <Link
+                      to="/playlist"
+                      search={{ playlistUrl: playlistUrl, index: index }}
+                      key={video.id}
+                      className="flex gap-2 px-2"
+                    >
+                      <video
+                        src={video.video}
+                        className="w-36 min-w-36 rounded-md line-clamp-2 text-ellipsis"
+                      ></video>
+                      <h5>{index}</h5>
+                      <div className="flex flex-col justify-between">
+                        <h5 className="font-medium text-lg">{video.title}</h5>
+                        <h5>{video.author.username}</h5>
+                      </div>
+                    </Link>
+                  ))}
+                </>
+              )}
             </div>
           </Fragment>
         </PlayVideoMainWidget>

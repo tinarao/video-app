@@ -10,11 +10,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
 import UserLikedVideos from '../pages/profile/LikedVideos';
-import UserPlaylists from '../pages/profile/UserPlaylists';
 import { PlusSquare } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
 import CreatePlaylistModal from '../modals/CreatePlaylistModal';
-import { useModals } from '@/hooks/useModal';
+import MyProfilePlaylists from '../pages/profile/MyProfilePlaylists';
 
 const panels = {
   'my-videos': 'Мои видео',
@@ -25,7 +24,6 @@ const panels = {
 const Profile = ({ user }: { user: User }) => {
   type Panels = keyof typeof panels;
   const [currentPanel, setCurrentPanel] = useState<Panels>('my-videos');
-  const { isCreatePlaylistModalShown, toggleCreatePlaylistModal } = useModals();
 
   return (
     <>
@@ -59,12 +57,8 @@ const Profile = ({ user }: { user: User }) => {
           </DropdownMenuContent>
         </DropdownMenu>
         {currentPanel === 'my-playlists' && (
-          <CreatePlaylistModal isShown={isCreatePlaylistModalShown}>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => toggleCreatePlaylistModal(true)}
-            >
+          <CreatePlaylistModal>
+            <Button variant="ghost" size="sm">
               <PlusSquare className="size-4 mr-2" />
               Создать плейлист
             </Button>
@@ -81,13 +75,14 @@ const Profile = ({ user }: { user: User }) => {
       </div>
       <div className="container py-4">
         {currentPanel === 'my-videos' && (
-          <UserVideosBlock videos={user.videos} />
+          <UserVideosBlock videos={user.videos!} />
         )}
         {currentPanel === 'liked-videos' && (
-          <UserLikedVideos videos={user.likedVideos} />
+          <UserLikedVideos videos={user.likedVideos!} />
         )}
         {currentPanel === 'my-playlists' && (
-          <UserPlaylists playlists={user.playlists} />
+          // <UserPlaylists playlists={user.playlists!} />
+          <MyProfilePlaylists playlists={user.playlists} />
         )}
       </div>
     </>

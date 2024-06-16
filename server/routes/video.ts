@@ -107,33 +107,30 @@ export const videosRoute = new Hono()
     .post('/', auth, zValidator('json', addVideoDTO), async (c) => {
         const user = c.var.user
         const data = addVideoDTO.parse(await c.req.json())
-        const author = await prisma.user.findFirst({
-            where: { id: user.id },
-            include: { videos: true }
-        })
-        if (!author) {
-            return c.json({ "message": "Bad request" }, 401);
-        }
 
-        const savedVideo = await prisma.video.create({
-            data: {
-                video: data.video,
-                desc: data.desc ?? "",
-                title: data.title,
-                url: data.url,
-                views: 0,
-                authorID: author.id,
-                category: data.category,
-                tags: data.tags,
-            },
-        })
+        const { savedVideo, updatedUser } = await prisma.$transaction(async tx => {
+            const savedVideo = await tx.video.create({
+                data: {
+                    video: data.video,
+                    desc: data.desc ?? "",
+                    title: data.title,
+                    url: data.url,
+                    views: 0,
+                    authorID: user.id,
+                    category: data.category,
+                    tags: data.tags,
+                },
+            })
 
-        const savedUser = await prisma.user.findFirst({
-            where: { id: user.id },
-            include: { videos: true }
+            const updatedUser = await tx.user.update({
+                where: { id: user.id },
+                data: { uploadedVideosCount: { increment: 1 } }
+            })
+
+            return { savedVideo, updatedUser }
         })
 
-        return c.json({ savedVideo, savedUser });
+        return c.json({ savedVideo, updatedUser });
     })
 
     .delete('/:id{[0-9]+}', auth, zValidator('json', addVideoDTO), async (c) => {
@@ -201,18 +198,36 @@ export const videosRoute = new Hono()
     .patch("/view/:id{[0-9]+}", async c => {
         const videoID = c.req.param('id')
 
-        const videoDoc = await prisma.video.findFirst({
-            where: { id: parseInt(videoID) },
-            select: { id: true, views: true }
-        })
-        if (!videoDoc) return c.json({ "message": "Видео не найдено" }, 404)
+        try {
+            const updatedVideo = await prisma.$transaction(async tx => {
+                const videoDoc = await tx.video.findFirst({
+                    where: { id: parseInt(videoID) },
+                    select: { id: true, views: true, author: { select: { id: true } } }
+                })
+                if (!videoDoc) {
+                    throw new Error("not-found")
+                }
 
-        const updatedVideo = await prisma.video.update({
-            where: { id: videoDoc.id },
-            data: { views: { increment: 1 } }
-        })
+                await tx.user.update({
+                    where: { id: videoDoc.author.id },
+                    data: { uploadedVideosViewsCount: { increment: 1 } }
+                })
 
-        return c.json({ updatedVideo }, 201)
+                return await tx.video.update({
+                    where: { id: videoDoc.id },
+                    data: { views: { increment: 1 } }
+                })
+            })
+            return c.json({ updatedVideo }, 201)
+        } catch (error) {
+            switch ((error as Error).message) {
+                case "not-found":
+                    return c.text("Видео не найдено", 404)
+                default:
+                    return c.text("Внутренняя ошибка сервера", 500)
+            }
+        }
+
     })
 
     .get("/liked/:userID", async c => {

@@ -14,6 +14,9 @@ export interface User {
     updatedAt?: Date | string;
     isVerified?: boolean;
 
+    uploadedVideosCount?: number
+    uploadedVideosViewsCount?: number
+
     videos?: Video[] | null;
     likedVideos?: Video[] | null;
     playlists?: PlaylistsFrontend[] | null;
