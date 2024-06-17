@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { useSubscriptions } from '@/hooks/useSubscribes';
 import { UserPlus2, UserRoundX } from 'lucide-react';
 import { toast } from 'sonner';
+import { api } from '@/lib/rpc';
+import { useNavigate } from '@tanstack/react-router';
+import { queryClient } from '@/main';
 
 interface SBProps {
   currentUser?: User;
@@ -12,7 +15,9 @@ interface SBProps {
 
 const SubscribeButton = ({ currentUser, targetUser }: SBProps) => {
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const { subscriptionIDs } = useSubscriptions();
+  const [isTheSameUser, setIsTheSameUser] = useState(false);
+  const { subscriptionIDs, subscribe, unsubscribe } = useSubscriptions();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!currentUser) {
@@ -20,16 +25,53 @@ const SubscribeButton = ({ currentUser, targetUser }: SBProps) => {
       return;
     }
 
+    if (currentUser.id === targetUser.id) {
+      setIsTheSameUser(true);
+      return;
+    }
+
     const isSubscribedTo = subscriptionIDs.includes(targetUser.id);
     setIsSubscribed(isSubscribedTo);
-  }, [currentUser, subscriptionIDs, targetUser.id]);
+  }, [currentUser, targetUser.id, subscriptionIDs]);
 
   const unsubscribeHandler = async () => {
-    toast.success('Отписан');
+    if (!currentUser) {
+      navigate({ to: '/login' });
+      return;
+    }
+
+    const res = await api.users.unsubscribe[':targetUserID{[0-9]+}'].$patch({
+      param: { targetUserID: String(targetUser.id) },
+    });
+    if (!res.ok) {
+      const resp = await res.text();
+      return toast.error(resp);
+    }
+
+    unsubscribe(targetUser.id);
+    queryClient.invalidateQueries({ queryKey: ['get-user-by-username'] });
+    console.log(await res.json());
+    return;
   };
 
   const subscribeHandler = async () => {
-    toast.success('Подписан');
+    if (!currentUser) {
+      navigate({ to: '/login' });
+      return;
+    }
+
+    const res = await api.users.subscribe[':targetUserID{[0-9]+}'].$patch({
+      param: { targetUserID: String(targetUser.id) },
+    });
+    if (!res.ok) {
+      const resp = await res.text();
+      return toast.error(resp);
+    }
+
+    subscribe(targetUser.id);
+    queryClient.invalidateQueries({ queryKey: ['get-user-by-username'] });
+    console.log(await res.json());
+    return;
   };
 
   // TODO: Функционал подписок завозить сюда
@@ -37,6 +79,7 @@ const SubscribeButton = ({ currentUser, targetUser }: SBProps) => {
     <>
       {isSubscribed ? (
         <Button
+          disabled={isTheSameUser}
           onClick={unsubscribeHandler}
           variant="outline"
           className="hover:bg-rose-400 hover:text-white"
@@ -45,6 +88,7 @@ const SubscribeButton = ({ currentUser, targetUser }: SBProps) => {
         </Button>
       ) : (
         <Button
+          disabled={isTheSameUser}
           onClick={subscribeHandler}
           variant="outline"
           className="hover:bg-green-300"
