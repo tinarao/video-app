@@ -19,7 +19,6 @@ import { toast } from 'sonner';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/main';
 import { api } from '@/lib/rpc';
-import { useLikes } from '@/hooks/useLikes';
 
 interface PVMWProps {
   user?: User;
@@ -40,7 +39,6 @@ const PlayVideoMainWidget = ({
   const [isLiked, setIsLiked] = useState(false);
   const [isViewCounted, setIsViewCounted] = useState(false);
   const [isDescShown, setIsDescShown] = useState(false);
-  const { likedVideos, addLikedVideo, removeLikedVideo } = useLikes();
 
   const like = useMutation({
     onError: () => toast.error('Произошла ошибка, попробуйте позже'),
@@ -65,21 +63,28 @@ const PlayVideoMainWidget = ({
     if (!isLiked) {
       like.mutateAsync('like');
       setIsLiked(true);
-      addLikedVideo(video!.id);
       return;
     }
 
     like.mutateAsync('dislike');
     setIsLiked(false);
-    removeLikedVideo(video!.id);
     return;
   };
 
   useEffect(() => {
     if (isSuccess) {
-      if (likedVideos.includes(video!.id)) setIsLiked(true);
+      if (!user) {
+        setIsLiked(false);
+        return;
+      }
+      user.likedVideos?.forEach((i) => {
+        if (i.id === video.id) {
+          setIsLiked(true);
+          return;
+        }
+      });
     }
-  }, [likedVideos, video, isSuccess]);
+  }, [video, isSuccess, user]);
 
   useEffect(() => {
     if (isSuccess && !isViewCounted) {
@@ -172,10 +177,11 @@ const PlayVideoMainWidget = ({
                       <Heart
                         className={cn(
                           'size-4',
-                          likedVideos.includes(video!.id) &&
+                          isLiked &&
                             'shadow-2xl shadow-red-500 text-red-500 fill-red-500',
                         )}
                       />
+                      {video.likes}
                     </Button>
                   </div>
                 </div>

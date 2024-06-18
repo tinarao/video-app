@@ -35,7 +35,7 @@ export const authRoute = new Hono()
 
         const userDoc = await prisma.user.findFirst({
             where: { id: parseInt(userID) },
-            include: { videos: true }
+            include: { videos: true, likedVideos: { select: { id: true } } }
         })
         if (!userDoc) {
             return c.json({ "message": "Bad request" }, 400)

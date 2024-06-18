@@ -16,3 +16,11 @@ export const viewsHandler = async (videoID: number) => {
 
   return
 }
+
+export const getHost = () => {
+  if (process.env.NODE_ENV === "development") {
+    return "http://localhost:5173"
+  } else {
+    return "https://ssilka_na_sait.com"
+  }
+}

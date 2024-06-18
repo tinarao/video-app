@@ -50,6 +50,7 @@ function UsernameRoute() {
   const { name: usernameParam }: SearchParams = Route.useSearch();
   const { data: activeUser } = useQuery(userQueryOpts); // the one who watches the page
   const [currentPanel, setCurrentPanel] = useState<Panels>('my-videos');
+  const [isCurrentUser, setIsCurrentUser] = useState(false);
   const [nonEmptyPlaylists, setNonEmptyPlaylists] = useState<
     PlaylistsFrontend[] | undefined
   >(undefined);
@@ -86,6 +87,16 @@ function UsernameRoute() {
     }
   }, [isSuccess, user?.playlists]);
 
+  useEffect(() => {
+    if (isSuccess) {
+      if (!activeUser) return;
+      if (activeUser.id === user.id) setIsCurrentUser(true);
+      return;
+    }
+
+    return;
+  }, [isSuccess]);
+
   if (isError) {
     return navigate({ to: '/' });
   }
@@ -121,7 +132,12 @@ function UsernameRoute() {
                 <UserInfoModal user={user!}>
                   <Button variant="outline">Подробнее о пользователе</Button>
                 </UserInfoModal>
-                <SubscribeButton currentUser={activeUser} targetUser={user!} />
+                {!isCurrentUser && (
+                  <SubscribeButton
+                    currentUser={activeUser}
+                    targetUser={user!}
+                  />
+                )}
                 <Button variant="outline" size="icon">
                   <Menu className="size-4" />
                 </Button>

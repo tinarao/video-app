@@ -20,7 +20,6 @@ const ProfileDropdown = ({ user }: { user: User }) => {
       console.log(res);
       return;
     }
-
     toast.success('Успешно!');
     window.location.reload();
   };

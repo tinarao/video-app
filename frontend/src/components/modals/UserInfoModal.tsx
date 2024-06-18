@@ -1,7 +1,10 @@
 import { User } from '@/types/user';
-import { Clock, Eye, User2, Video } from 'lucide-react';
+import { Clock, Eye, Globe, User2, Video } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '../ui/separator';
+import { Button } from '../ui/button';
+import { getHost } from '@/lib/utils';
+import { toast } from 'sonner';
 
 interface UIMProps {
   children: JSX.Element;
@@ -58,6 +61,25 @@ const UserInfoModal = ({ children, user }: UIMProps) => {
                 <Eye className="size-4 mr-2" />
                 <span>{user.uploadedVideosViewsCount} просмотров</span>
               </div>
+            </div>
+          </div>
+          <div className="py-4">
+            <div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const host = getHost();
+                  navigator.clipboard
+                    .writeText(`${host}/user?name=${user.username}`)
+                    .then(() => {
+                      toast.success('Ссылка скопирована!');
+                    })
+                    .catch(() => toast.error('Не удалось скопировать ссылку'));
+                }}
+              >
+                <Globe className="size-4 mr-2" /> Скопировать ссылку
+              </Button>
             </div>
           </div>
         </div>

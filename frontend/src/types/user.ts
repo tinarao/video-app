@@ -20,4 +20,7 @@ export interface User {
     videos?: Video[] | null;
     likedVideos?: Video[] | null;
     playlists?: PlaylistsFrontend[] | null;
+
+    subscribers?: User[]
+    subscribedTo?: User[]
 }
