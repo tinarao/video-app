@@ -14,6 +14,7 @@ import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as VideoImport } from './routes/video'
+import { Route as TestImport } from './routes/test'
 import { Route as AuthenticatedImport } from './routes/_authenticated'
 import { Route as IndexImport } from './routes/index'
 import { Route as UserIndexImport } from './routes/user/index'
@@ -54,6 +55,11 @@ const LoginLazyRoute = LoginLazyImport.update({
 
 const VideoRoute = VideoImport.update({
   path: '/video',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TestRoute = TestImport.update({
+  path: '/test',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -138,6 +144,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedImport
       parentRoute: typeof rootRoute
     }
+    '/test': {
+      preLoaderRoute: typeof TestImport
+      parentRoute: typeof rootRoute
+    }
     '/video': {
       preLoaderRoute: typeof VideoImport
       parentRoute: typeof rootRoute
@@ -197,6 +207,7 @@ export const routeTree = rootRoute.addChildren([
     AuthenticatedDashboardProfileIndexLazyRoute,
     AuthenticatedDashboardVideosIndexLazyRoute,
   ]),
+  TestRoute,
   VideoRoute,
   LoginLazyRoute,
   RegisterLazyRoute,

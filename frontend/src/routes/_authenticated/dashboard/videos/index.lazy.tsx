@@ -30,7 +30,7 @@ function Videos() {
   };
 
   const { data: videos, isLoading } = useQuery({
-    queryKey: ['videos-by-user'],
+    queryKey: ['videos-by-user', user!.id],
     queryFn: getVideos,
   });
 
@@ -52,7 +52,7 @@ function Videos() {
         ) : (
           <div>
             {videos.map((i) => (
-              <DashVideoInfo key={i.id} video={i} />
+              <DashVideoInfo key={i.id} user={user!} video={i} />
             ))}
           </div>
         )}

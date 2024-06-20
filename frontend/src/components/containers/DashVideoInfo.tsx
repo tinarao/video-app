@@ -12,18 +12,26 @@ import { toast } from 'sonner';
 import { api } from '@/lib/rpc';
 import { useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/main';
+import { User } from '@/types/user';
+import { useState } from 'react';
 
-const DashVideoInfo = ({ video }: { video: Video }) => {
+interface DVIProps {
+  video: Video;
+  user: User;
+}
+
+const DashVideoInfo = ({ video, user }: DVIProps) => {
   const createdAt = new Date(video.createdAt).toLocaleString();
+  const [isVideoHidden, setIsVideoHidden] = useState(video.isHidden);
 
   const status = useMutation({
     onError: () => toast.error('Произошла ошибка, попробуйте позже'),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['videos-by-user'] });
+      await queryClient.invalidateQueries({
+        queryKey: ['videos-by-user', user!.id],
+      });
     },
     mutationFn: async (action: 'show' | 'hide') => {
-      toast.info('Mutation function is triggered');
-
       const res = await api.videos.access[':videoID{[0-9]+}'][':action'].$patch(
         {
           param: { videoID: String(video.id), action: action },
@@ -43,6 +51,22 @@ const DashVideoInfo = ({ video }: { video: Video }) => {
         }
       }
 
+      if (action === 'hide') {
+        setIsVideoHidden(true);
+        toast.info(
+          `
+          Видео "${video.title}" было успешно скрыто из общего доступа.
+          Другие пользователи всё ещё могут открыть видео, если у них есть прямая ссылка.
+          `,
+        );
+      }
+
+      if (action === 'show') {
+        setIsVideoHidden(false);
+        toast.info(
+          `Доступ к видео "${video.title}" открыт. Теперь его могут просмотреть все пользователи.`,
+        );
+      }
       return;
     },
   });
@@ -73,7 +97,7 @@ const DashVideoInfo = ({ video }: { video: Video }) => {
             <span className="font-medium text-md">{video.likes}</span>
           </div>
           <div className="flex items-center col-span-1">
-            {video.isHidden ? (
+            {isVideoHidden ? (
               <EyeOff className="size-5 mr-2" />
             ) : (
               <Eye className="size-5 mr-2" />
@@ -87,7 +111,7 @@ const DashVideoInfo = ({ video }: { video: Video }) => {
               <Button variant="outline">Действия</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="center">
-              {video.isHidden ? (
+              {isVideoHidden ? (
                 <DropdownMenuItem onClick={() => status.mutate('show')}>
                   Открыть доступ
                 </DropdownMenuItem>

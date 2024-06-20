@@ -11,7 +11,7 @@ import {
   redirect,
 } from '@tanstack/react-router';
 import { z } from 'zod';
-import { Fragment, useEffect } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
 import { LoaderCircle } from 'lucide-react';
 
 const searchParams = z.object({
@@ -35,15 +35,16 @@ function PostComponent() {
   const getVideo = async (videoID: string) => {
     const res = await api.videos[':url'].$get({ param: { url: videoID } });
 
-    const data = await res.json();
-    return data.foundVid;
+    const { foundVid } = await res.json();
+    return foundVid;
   };
 
   const getRecommendations = async () => {
     const res = await api.videos.search.cat.$get({
       query: { category: video!.category },
     });
-    return await res.json();
+    const data = await res.json();
+    return data;
   };
 
   const {

@@ -138,9 +138,6 @@ function UsernameRoute() {
                     targetUser={user!}
                   />
                 )}
-                <Button variant="outline" size="icon">
-                  <Menu className="size-4" />
-                </Button>
               </div>
             </div>
             <div className="py-4 border-b flex justify-between items-center">
